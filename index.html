@@ -893,6 +893,7 @@ function fetchJsonp(params) {
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
     url.searchParams.set('storeId', STORE_ID);
     url.searchParams.set('callback', callback);
+    url.searchParams.set('public', '1');
     url.searchParams.set('ts', Date.now());
     const script = document.createElement('script');
     const timer = setTimeout(() => cleanup(new Error('timeout')), 12000);
@@ -915,6 +916,7 @@ async function remoteGet(resource) {
     url.searchParams.set('action', 'list');
     url.searchParams.set('resource', resource);
     url.searchParams.set('storeId', STORE_ID);
+    url.searchParams.set('public', '1');
     url.searchParams.set('ts', Date.now());
     const res = await fetch(url.toString());
     return await res.json();
@@ -1161,6 +1163,7 @@ loadStoreData();
 </script>
 </body>
 </html>
+
 
 
 
