@@ -473,6 +473,65 @@
   .empty-state i { display: block; margin-bottom: 10px; font-size: 44px; color: var(--teal); }
   .empty-state p { font-size: 13px; font-weight: 700; }
 
+
+  .articles-section { padding: 4px 16px 18px; }
+  .article-feed { display: grid; gap: 12px; }
+  .article-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(216,227,238,.95);
+    border-radius: var(--radius);
+    background: rgba(255,255,255,.94);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: .18s ease;
+  }
+  .article-card:hover { transform: translateY(-2px); border-color: rgba(0,183,179,.55); box-shadow: var(--shadow-md); }
+  .article-cover {
+    width: 100%;
+    aspect-ratio: 16/7;
+    background: radial-gradient(circle at 80% 15%, rgba(0,183,179,.16), transparent 34%), linear-gradient(145deg, #fff, var(--mint));
+    border-bottom: 1px solid rgba(216,227,238,.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--teal-dk);
+    font-size: 42px;
+    overflow: hidden;
+  }
+  .article-cover img { width: 100%; height: 100%; object-fit: cover; }
+  .article-content { padding: 14px; }
+  .article-kicker { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; color: var(--teal-dk); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; }
+  .article-title { color: var(--blue-dk); font-size: 16px; font-weight: 800; line-height: 1.35; margin-bottom: 7px; }
+  .article-excerpt { color: var(--text2); font-size: 12.5px; line-height: 1.65; margin-bottom: 12px; }
+  .article-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; color: var(--text3); font-size: 11px; font-weight: 700; }
+  .article-meta i { color: var(--teal-dk); font-size: 15px; }
+  .article-status { padding: 4px 8px; border-radius: 999px; background: rgba(45,62,141,.10); color: var(--blue); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+  .article-sync-note { padding: 10px 16px; color: var(--text2); font-size: 11.5px; line-height: 1.55; background: rgba(0,183,179,.06); border-top: 1px solid var(--border); }
+
+  .article-modal-cover {
+    width: calc(100% - 28px);
+    aspect-ratio: 16/8;
+    margin: 14px;
+    border-radius: 18px;
+    background: radial-gradient(circle at 85% 12%, rgba(0,183,179,.18), transparent 30%), linear-gradient(145deg, #fff, var(--mint));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--teal-dk);
+    font-size: 58px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .article-modal-cover img { width: 100%; height: 100%; object-fit: cover; }
+  .article-modal-body { padding: 6px 20px 12px; }
+  .article-modal-title { color: var(--blue-dk); font-size: 22px; font-weight: 800; line-height: 1.25; margin: 8px 0; }
+  .article-modal-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; color: var(--text3); font-size: 11.5px; font-weight: 700; }
+  .article-modal-copy { color: var(--text2); font-size: 13.5px; line-height: 1.85; white-space: pre-wrap; }
+
+  .sync-row { display: flex; gap: 8px; align-items: center; }
+  .sync-row .form-input { flex: 1; }
+  .sync-row .btn-primary { width: auto; margin-bottom: 0; padding: 11px 14px; flex-shrink: 0; }
   .store-footer {
     margin: 4px 16px 0;
     overflow: hidden;
@@ -731,6 +790,11 @@
     <div class="section-label" id="section-label">Semua Produk & Layanan</div>
     <div class="products-grid" id="products-grid"></div>
   </div>
+
+  <div class="articles-section">
+    <div class="section-label">Artikel & Insight</div>
+    <div class="article-feed" id="article-feed"></div>
+  </div>
   <div class="store-footer">
     <div class="store-footer-row">
       <div class="store-footer-item"><i class="ti ti-heart-handshake"></i>People First. Systems Second.</div>
@@ -809,6 +873,19 @@
       </div>
     </div>
 
+
+    <!-- Apps Script database -->
+    <div class="admin-card">
+      <div class="admin-card-title">Database Apps Script</div>
+      <div class="form-row">
+        <div class="form-label">Web App URL</div>
+        <div class="sync-row">
+          <input class="form-input" id="adm-appscript-url" placeholder="https://script.google.com/macros/s/AKfycb.../exec" />
+          <button class="btn-primary" onclick="saveAppScriptUrl()"><i class="ti ti-database"></i>Simpan</button>
+        </div>
+      </div>
+      <div class="article-sync-note" id="article-sync-note">Artikel tetap tersimpan lokal. Isi URL Apps Script untuk sinkron database.</div>
+    </div>
     <!-- Add/Edit product -->
     <div class="admin-card">
       <div class="admin-card-title">
@@ -861,6 +938,56 @@
       <div id="admin-product-list"></div>
     </div>
 
+
+    <!-- Add/Edit article -->
+    <div class="admin-card">
+      <div class="admin-card-title">
+        <span id="article-form-title">Tambah Artikel</span>
+        <button id="btn-cancel-article-edit" style="display:none" onclick="cancelArticleEdit()" class="btn-edit">Batal Edit</button>
+      </div>
+      <div class="form-row">
+        <div class="form-label">Judul Artikel</div>
+        <input class="form-input" id="adm-atitle" placeholder="Judul posting / artikel" />
+      </div>
+      <div class="form-row">
+        <div class="form-label">Topik</div>
+        <input class="form-input" id="adm-atopic" placeholder="Automation, Systems, Training..." />
+      </div>
+      <div class="form-row">
+        <div class="form-label">Ringkasan</div>
+        <textarea class="form-textarea" id="adm-aexcerpt" placeholder="Ringkasan singkat seperti intro posting LinkedIn..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-label">Isi Artikel</div>
+        <textarea class="form-textarea" id="adm-abody" style="min-height:150px" placeholder="Tulis artikel lengkap di sini..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-label">Gambar Artikel</div>
+        <div class="img-upload-area" id="article-upload-area">
+          <input type="file" accept="image/*" id="article-file-input">
+          <div id="article-upload-content">
+            <i class="ti ti-photo-plus"></i>
+            <span>Upload gambar artikel</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-label">Status</div>
+        <select class="form-select" id="adm-astatus">
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <button class="btn-primary" id="btn-save-article" onclick="saveArticle()"><i class="ti ti-send"></i>Simpan Artikel</button>
+      </div>
+    </div>
+
+    <!-- Article list -->
+    <div class="admin-card">
+      <div class="admin-card-title">Artikel Tersimpan</div>
+      <div id="admin-article-list"></div>
+    </div>
     <!-- Security -->
     <div class="admin-card" style="border-color:#fecaca">
       <div class="admin-card-title" style="color:#dc2626;background:#fff5f5">Keamanan</div>
@@ -896,6 +1023,21 @@
   </div>
 </div>
 
+
+<!-- Article Modal -->
+<div class="modal-overlay" id="article-modal" onclick="handleArticleModalClick(event)">
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+    <div class="article-modal-cover" id="article-modal-cover"></div>
+    <div class="article-modal-body">
+      <div id="article-modal-kicker"></div>
+      <div class="article-modal-title" id="article-modal-title"></div>
+      <div class="article-modal-meta" id="article-modal-meta"></div>
+      <div class="article-modal-copy" id="article-modal-copy"></div>
+      <button class="modal-close-btn" onclick="closeArticleModal()">Tutup</button>
+    </div>
+  </div>
+</div>
 <!-- Pass Gate -->
 <div class="pass-gate" id="pass-gate" style="display:none">
   <div class="pass-logo">FA</div>
@@ -912,10 +1054,11 @@
 <div class="toast" id="toast"></div>
 
 <script>
-let products = [], profile = {}, payment = {};
+let products = [], profile = {}, payment = {}, articles = [];
+let appScriptUrl = '';
 let activeCat = 'all';
-let editingId = null;
-let productImgData = null, avatarImgData = null;
+let editingId = null, editingArticleId = null;
+let productImgData = null, avatarImgData = null, articleImgData = null;
 
 const DEFAULT_PASS = 'admin123';
 const CAT_ICONS = { digital:'ti-file-code', jasa:'ti-brush', fisik:'ti-package', portofolio:'ti-photo' };
@@ -927,19 +1070,21 @@ function getData() {
   try { products = JSON.parse(localStorage.getItem('_fa_products') || '[]'); } catch { products = []; }
   try { profile  = JSON.parse(localStorage.getItem('_fa_profile')  || '{}'); } catch { profile = {}; }
   try { payment  = JSON.parse(localStorage.getItem('_fa_payment')  || '{}'); } catch { payment = {}; }
+  try { articles = JSON.parse(localStorage.getItem('_fa_articles') || '[]'); } catch { articles = []; }
+  appScriptUrl = localStorage.getItem('_fa_appscript_url') || '';
 }
 
 function showStore() {
   document.getElementById('view-store').classList.add('active');
   document.getElementById('view-admin').classList.remove('active');
   document.getElementById('fab-admin').style.display = 'flex';
-  renderHero(); renderProducts();
+  renderHero(); renderProducts(); renderArticles();
 }
 function showAdmin() {
   document.getElementById('view-store').classList.remove('active');
   document.getElementById('view-admin').classList.add('active');
   document.getElementById('fab-admin').style.display = 'none';
-  loadAdminForm(); renderAdminProductList();
+  loadAdminForm(); renderAdminProductList(); renderAdminArticleList();
 }
 
 // Pass
@@ -1101,6 +1246,7 @@ function loadAdminForm() {
   document.getElementById('adm-bank').value     = payment.bank     || '';
   document.getElementById('adm-ewallet').value  = payment.ewallet  || '';
   document.getElementById('adm-qris').value     = payment.qris     || '';
+  document.getElementById('adm-appscript-url').value = appScriptUrl;
   if (profile.avatar) {
     document.getElementById('avatar-upload-content').innerHTML =
       `<img src="${profile.avatar}" class="img-preview"><span>Tap untuk ganti</span>`;
@@ -1145,6 +1291,7 @@ function setupImageUpload(inputId, contentId, cb) {
 }
 setupImageUpload('avatar-file-input',  'avatar-upload-content',  d => avatarImgData  = d);
 setupImageUpload('product-file-input', 'product-upload-content', d => productImgData = d);
+setupImageUpload('article-file-input', 'article-upload-content', d => articleImgData = d);
 
 function saveProduct() {
   const name = document.getElementById('adm-pname').value.trim();
@@ -1232,16 +1379,244 @@ function renderAdminProductList() {
   `).join('');
 }
 
+
+function escapeHTML(v) {
+  return String(v || '').replace(/[&<>"]/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[ch]));
+}
+
+function formatArticleDate(v) {
+  const d = v ? new Date(v) : new Date();
+  if (Number.isNaN(d.getTime())) return 'Baru saja';
+  return d.toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function getPublishedArticles() {
+  return articles
+    .filter(a => (a.status || 'published') === 'published')
+    .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
+}
+
+function renderArticles() {
+  const feed = document.getElementById('article-feed');
+  if (!feed) return;
+  const visible = getPublishedArticles();
+  if (!visible.length) {
+    feed.innerHTML = `<div class="empty-state">
+      <i class="ti ti-news-off"></i>
+      <p>Belum ada artikel atau posting.</p>
+    </div>`;
+    return;
+  }
+  feed.innerHTML = visible.map(a => `
+    <div class="article-card" onclick="openArticle('${a.id}')">
+      <div class="article-cover">${a.img ? `<img src="${a.img}" alt="${escapeHTML(a.title)}">` : `<i class="ti ti-news"></i>`}</div>
+      <div class="article-content">
+        <div class="article-kicker"><i class="ti ti-message-circle"></i>${escapeHTML(a.topic || 'Insight')}</div>
+        <div class="article-title">${escapeHTML(a.title)}</div>
+        <div class="article-excerpt">${escapeHTML(a.excerpt || (a.body || '').slice(0, 150))}</div>
+        <div class="article-meta"><i class="ti ti-calendar"></i>${formatArticleDate(a.updatedAt || a.createdAt)}<span>&middot;</span><span>Baca selengkapnya</span></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openArticle(id) {
+  const a = articles.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('article-modal-cover').innerHTML = a.img
+    ? `<img src="${a.img}" alt="${escapeHTML(a.title)}">`
+    : `<i class="ti ti-news"></i>`;
+  document.getElementById('article-modal-kicker').innerHTML = `<div class="article-kicker"><i class="ti ti-message-circle"></i>${escapeHTML(a.topic || 'Insight')}</div>`;
+  document.getElementById('article-modal-title').textContent = a.title;
+  document.getElementById('article-modal-meta').innerHTML = `<span>${formatArticleDate(a.updatedAt || a.createdAt)}</span><span>&middot;</span><span>Farid Adam</span>`;
+  document.getElementById('article-modal-copy').textContent = a.body || a.excerpt || '';
+  document.getElementById('article-modal').classList.add('open');
+}
+
+function closeArticleModal() { document.getElementById('article-modal').classList.remove('open'); }
+function handleArticleModalClick(e) { if (e.target === document.getElementById('article-modal')) closeArticleModal(); }
+
+function saveAppScriptUrl() {
+  appScriptUrl = document.getElementById('adm-appscript-url').value.trim();
+  localStorage.setItem('_fa_appscript_url', appScriptUrl);
+  updateArticleSyncNote(appScriptUrl ? 'Endpoint Apps Script tersimpan. Mencoba ambil artikel...' : 'Endpoint dikosongkan. Artikel memakai penyimpanan lokal.');
+  if (appScriptUrl) loadRemoteArticles();
+}
+
+function updateArticleSyncNote(msg) {
+  const el = document.getElementById('article-sync-note');
+  if (el) el.textContent = msg;
+}
+
+function applyRemoteArticles(data) {
+  const remote = Array.isArray(data) ? data : (data.articles || []);
+  if (!Array.isArray(remote)) return false;
+  articles = remote;
+  localStorage.setItem('_fa_articles', JSON.stringify(articles));
+  renderArticles();
+  renderAdminArticleList();
+  updateArticleSyncNote('Artikel berhasil dimuat dari Apps Script.');
+  return true;
+}
+
+function loadRemoteArticlesJsonp() {
+  return new Promise((resolve, reject) => {
+    if (!appScriptUrl || !document.body) return reject(new Error('Endpoint belum siap'));
+    const cb = `faArticlesCallback_${Date.now()}`;
+    const sep = appScriptUrl.includes('?') ? '&' : '?';
+    const script = document.createElement('script');
+    const cleanup = () => { delete window[cb]; script.remove(); clearTimeout(timer); };
+    window[cb] = data => { cleanup(); resolve(data); };
+    script.onerror = () => { cleanup(); reject(new Error('JSONP gagal')); };
+    script.src = `${appScriptUrl}${sep}action=list&resource=articles&callback=${cb}&ts=${Date.now()}`;
+    const timer = setTimeout(() => { cleanup(); reject(new Error('JSONP timeout')); }, 10000);
+    document.body.appendChild(script);
+  });
+}
+
+async function loadRemoteArticles() {
+  if (!appScriptUrl) return;
+  try {
+    const sep = appScriptUrl.includes('?') ? '&' : '?';
+    const res = await fetch(`${appScriptUrl}${sep}action=list&resource=articles&ts=${Date.now()}`);
+    const data = await res.json();
+    if (applyRemoteArticles(data)) return;
+  } catch (err) {
+    try {
+      const data = await loadRemoteArticlesJsonp();
+      if (applyRemoteArticles(data)) return;
+    } catch (jsonpErr) {
+      updateArticleSyncNote('Belum bisa membaca Apps Script. Artikel lokal tetap dipakai.');
+    }
+  }
+}
+
+async function syncArticle(action, article) {
+  if (!appScriptUrl) return;
+  try {
+    await fetch(appScriptUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, resource: 'articles', article })
+    });
+    updateArticleSyncNote('Perubahan artikel dikirim ke Apps Script.');
+  } catch (err) {
+    updateArticleSyncNote('Sinkron Apps Script gagal. Perubahan tetap tersimpan lokal.');
+  }
+}
+
+async function saveArticle() {
+  const title = document.getElementById('adm-atitle').value.trim();
+  if (!title) { showToast('Judul artikel wajib diisi'); return; }
+  const now = new Date().toISOString();
+  const payload = {
+    id: editingArticleId || Date.now().toString(36),
+    title,
+    topic: document.getElementById('adm-atopic').value.trim() || 'Insight',
+    excerpt: document.getElementById('adm-aexcerpt').value.trim(),
+    body: document.getElementById('adm-abody').value.trim(),
+    img: articleImgData || '',
+    status: document.getElementById('adm-astatus').value,
+    createdAt: now,
+    updatedAt: now
+  };
+  if (editingArticleId) {
+    const idx = articles.findIndex(a => a.id === editingArticleId);
+    if (idx !== -1) payload.createdAt = articles[idx].createdAt || now;
+    if (idx !== -1) articles[idx] = { ...articles[idx], ...payload, img: articleImgData || articles[idx].img || '' };
+    showToast('Artikel diperbarui OK');
+  } else {
+    articles.push(payload);
+    showToast('Artikel ditambahkan OK');
+  }
+  localStorage.setItem('_fa_articles', JSON.stringify(articles));
+  await syncArticle('upsert', editingArticleId ? articles.find(a => a.id === editingArticleId) : payload);
+  cancelArticleEdit();
+  renderArticles();
+  renderAdminArticleList();
+}
+
+function editArticle(id) {
+  const a = articles.find(x => x.id === id); if (!a) return;
+  editingArticleId = id;
+  articleImgData = a.img || null;
+  document.getElementById('adm-atitle').value = a.title || '';
+  document.getElementById('adm-atopic').value = a.topic || '';
+  document.getElementById('adm-aexcerpt').value = a.excerpt || '';
+  document.getElementById('adm-abody').value = a.body || '';
+  document.getElementById('adm-astatus').value = a.status || 'published';
+  if (a.img) document.getElementById('article-upload-content').innerHTML = `<img src="${a.img}" class="img-preview"><span>Tap untuk ganti</span>`;
+  document.getElementById('article-form-title').textContent = 'Edit Artikel';
+  document.getElementById('btn-cancel-article-edit').style.display = 'block';
+  document.getElementById('btn-save-article').innerHTML = '<i class="ti ti-send"></i>Update Artikel';
+  document.getElementById('adm-atitle').scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+function cancelArticleEdit() {
+  editingArticleId = null;
+  articleImgData = null;
+  clearArticleForm();
+  document.getElementById('article-form-title').textContent = 'Tambah Artikel';
+  document.getElementById('btn-cancel-article-edit').style.display = 'none';
+  document.getElementById('btn-save-article').innerHTML = '<i class="ti ti-send"></i>Simpan Artikel';
+}
+
+function clearArticleForm() {
+  ['adm-atitle','adm-atopic','adm-aexcerpt','adm-abody'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('adm-astatus').value = 'published';
+  document.getElementById('article-upload-content').innerHTML = `<i class="ti ti-photo-plus"></i><span>Upload gambar artikel</span>`;
+}
+
+async function deleteArticle(id) {
+  if (!confirm('Hapus artikel ini?')) return;
+  const deleted = articles.find(a => a.id === id);
+  articles = articles.filter(a => a.id !== id);
+  localStorage.setItem('_fa_articles', JSON.stringify(articles));
+  await syncArticle('delete', deleted || { id });
+  renderArticles(); renderAdminArticleList(); showToast('Artikel dihapus');
+}
+
+function renderAdminArticleList() {
+  const el = document.getElementById('admin-article-list');
+  if (!el) return;
+  if (!articles.length) {
+    el.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px">Belum ada artikel</div>`;
+    return;
+  }
+  el.innerHTML = articles
+    .slice()
+    .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0))
+    .map(a => `
+      <div class="pli">
+        <div class="pli-thumb">${a.img ? `<img src="${a.img}">` : `<i class="ti ti-news"></i>`}</div>
+        <div class="pli-info">
+          <div class="pli-name">${escapeHTML(a.title)}</div>
+          <div class="pli-meta">${escapeHTML(a.topic || 'Insight')} &middot; ${formatArticleDate(a.updatedAt || a.createdAt)} &middot; ${(a.status || 'published') === 'published' ? 'Published' : 'Draft'}</div>
+        </div>
+        <div class="pli-actions">
+          <button class="btn-edit" onclick="editArticle('${a.id}')"><i class="ti ti-pencil"></i></button>
+          <button class="btn-danger" onclick="deleteArticle('${a.id}')"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+    `).join('');
+}
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-getData(); showStore();
+getData(); showStore(); loadRemoteArticles();
 </script>
 </body>
 </html>
+
+
+
+
+
+
 
 
 
