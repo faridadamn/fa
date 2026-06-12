@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Farid Adam - Automation &amp; Systems Storefront</title>
+<title>Admin - Farid Adam Storefront</title>
+<meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
@@ -634,15 +635,6 @@
   }
   .btn-buy:hover, .btn-primary:hover { transform: translateY(-1px); opacity: .94; }
 
-
-  .checkout-box { margin-top: 12px; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: #fff; }
-  .checkout-title { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; color: var(--blue-dk); font-size: 12px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; }
-  .checkout-grid { display: grid; gap: 9px; }
-  .checkout-input, .checkout-textarea { width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--offwhite); color: var(--text); font-family: 'Poppins', sans-serif; font-size: 13px; }
-  .checkout-textarea { min-height: 76px; resize: vertical; }
-  .checkout-input:focus, .checkout-textarea:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 4px rgba(0,183,179,.08); }
-  .checkout-help { color: var(--text2); font-size: 11.5px; line-height: 1.55; }
-  .order-success { margin-top: 12px; padding: 13px; border-radius: var(--radius-sm); background: rgba(0,183,179,.10); color: var(--teal-dk); font-size: 12.5px; font-weight: 700; line-height: 1.6; }
   .modal-payment { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 15px; margin-bottom: 10px; }
   .payment-title { display: flex; align-items: center; gap: 6px; margin-bottom: 11px; color: var(--text2); font-size: 11px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; }
   .payment-title i { color: var(--teal); }
@@ -813,6 +805,210 @@
   </div>
 </div>
 
+<!-- ===== ADMIN ===== -->
+<div id="view-admin" class="view">
+  <div class="admin-topbar">
+    <h2>Panel Admin</h2>
+    <button class="btn-back" onclick="showStore()">
+      <i class="ti ti-arrow-left"></i>Lihat Toko
+    </button>
+  </div>
+
+  <div class="admin-body">
+
+    <!-- Profile -->
+    <div class="admin-card">
+      <div class="admin-card-title">Profil</div>
+      <div class="form-row">
+        <div class="form-label">Nama</div>
+        <input class="form-input" id="adm-name" placeholder="Nama kamu" />
+      </div>
+      <div class="form-row">
+        <div class="form-label">Tagline</div>
+        <input class="form-input" id="adm-tagline" placeholder="Tagline singkat..." />
+      </div>
+      <div class="form-row">
+        <div class="form-label">Foto Profil</div>
+        <div class="img-upload-area" id="avatar-upload-area">
+          <input type="file" accept="image/*" id="avatar-file-input">
+          <div id="avatar-upload-content">
+            <i class="ti ti-user-circle"></i>
+            <span>Upload foto profil</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-label">Instagram</div>
+        <input class="form-input" id="adm-ig" placeholder="@username" />
+      </div>
+      <div class="form-row">
+        <div class="form-label">WhatsApp</div>
+        <input class="form-input" id="adm-wa" placeholder="628xxxxxxxxxx" />
+      </div>
+      <div class="form-row">
+        <div class="form-label">LinkedIn (optional)</div>
+        <input class="form-input" id="adm-linkedin" placeholder="linkedin.com/in/username" />
+      </div>
+      <div class="form-row">
+        <button class="btn-primary" onclick="saveProfile()"><i class="ti ti-check" style="margin-right:6px"></i>Simpan Profil</button>
+      </div>
+    </div>
+
+    <!-- Payment -->
+    <div class="admin-card">
+      <div class="admin-card-title">Pembayaran</div>
+      <div class="form-row">
+        <div class="form-label">Nomor Rekening / Bank</div>
+        <input class="form-input" id="adm-bank" placeholder="BCA 1234567890 a.n Farid Adam" />
+      </div>
+      <div class="form-row">
+        <div class="form-label">GoPay / DANA / OVO</div>
+        <input class="form-input" id="adm-ewallet" placeholder="08xxxxxxxxxx" />
+      </div>
+      <div class="form-row">
+        <div class="form-label">Link QRIS</div>
+        <input class="form-input" id="adm-qris" placeholder="https://qris.link/..." />
+      </div>
+      <div class="form-row">
+        <button class="btn-primary" onclick="savePayment()"><i class="ti ti-check" style="margin-right:6px"></i>Simpan Pembayaran</button>
+      </div>
+    </div>
+
+
+    <!-- Apps Script database -->
+    <div class="admin-card">
+      <div class="admin-card-title">Database Apps Script</div>
+      <div class="article-sync-note" id="article-sync-note">Endpoint database aktif. Data produk, artikel, dan order disinkronkan ke Google Sheets.</div>
+    </div>
+      <div class="article-sync-note" id="article-sync-note">Artikel tetap tersimpan lokal. Isi URL Apps Script untuk sinkron database.</div>
+    </div>
+    <!-- Add/Edit product -->
+    <div class="admin-card">
+      <div class="admin-card-title">
+        <span id="product-form-title">Tambah Produk</span>
+        <button id="btn-cancel-edit" style="display:none" onclick="cancelEdit()" class="btn-edit" style="font-size:11px">Batal Edit</button>
+      </div>
+      <div class="form-row">
+        <div class="form-label">Nama Produk / Layanan</div>
+        <input class="form-input" id="adm-pname" placeholder="Nama produk / layanan" />
+      </div>
+      <div class="form-row">
+        <div class="form-label">Kategori</div>
+        <select class="form-select" id="adm-pcat">
+          <option value="digital">Produk Digital</option>
+          <option value="jasa">Jasa / Layanan</option>
+          <option value="fisik">Produk Fisik</option>
+          <option value="portofolio">Portofolio / Karya</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-label">Deskripsi</div>
+        <textarea class="form-textarea" id="adm-pdesc" placeholder="Jelaskan produk / layanan ini..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-label">Harga (Rp &middot; isi 0 untuk Gratis)</div>
+        <input class="form-input" id="adm-pprice" type="number" min="0" placeholder="500000" />
+      </div>
+      <div class="form-row">
+        <div class="form-label">Foto Produk</div>
+        <div class="img-upload-area" id="product-upload-area">
+          <input type="file" accept="image/*" id="product-file-input">
+          <div id="product-upload-content">
+            <i class="ti ti-photo"></i>
+            <span>Upload foto produk</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-label">Link (download / referensi)</div>
+        <input class="form-input" id="adm-plink" placeholder="https://..." />
+      </div>
+      <div class="form-row">
+        <button class="btn-primary" id="btn-save-product" onclick="saveProduct()">Simpan Produk</button>
+      </div>
+    </div>
+
+    <!-- Product list -->
+    <div class="admin-card">
+      <div class="admin-card-title">Produk Tersimpan</div>
+      <div id="admin-product-list"></div>
+    </div>
+
+
+    <!-- Add/Edit article -->
+    <div class="admin-card">
+      <div class="admin-card-title">
+        <span id="article-form-title">Tambah Artikel</span>
+        <button id="btn-cancel-article-edit" style="display:none" onclick="cancelArticleEdit()" class="btn-edit">Batal Edit</button>
+      </div>
+      <div class="form-row">
+        <div class="form-label">Judul Artikel</div>
+        <input class="form-input" id="adm-atitle" placeholder="Judul posting / artikel" />
+      </div>
+      <div class="form-row">
+        <div class="form-label">Topik</div>
+        <input class="form-input" id="adm-atopic" placeholder="Automation, Systems, Training..." />
+      </div>
+      <div class="form-row">
+        <div class="form-label">Ringkasan</div>
+        <textarea class="form-textarea" id="adm-aexcerpt" placeholder="Ringkasan singkat seperti intro posting LinkedIn..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-label">Isi Artikel</div>
+        <textarea class="form-textarea" id="adm-abody" style="min-height:150px" placeholder="Tulis artikel lengkap di sini..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-label">Gambar Artikel</div>
+        <div class="img-upload-area" id="article-upload-area">
+          <input type="file" accept="image/*" id="article-file-input">
+          <div id="article-upload-content">
+            <i class="ti ti-photo-plus"></i>
+            <span>Upload gambar artikel</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-label">Status</div>
+        <select class="form-select" id="adm-astatus">
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <button class="btn-primary" id="btn-save-article" onclick="saveArticle()"><i class="ti ti-send"></i>Simpan Artikel</button>
+      </div>
+    </div>
+
+    <!-- Article list -->
+    <div class="admin-card">
+      <div class="admin-card-title">Artikel Tersimpan</div>
+      <div id="admin-article-list"></div>
+    </div>
+
+    <!-- Order list -->
+    <div class="admin-card">
+      <div class="admin-card-title">Order & Konfirmasi Pembayaran</div>
+      <div id="admin-order-list"></div>
+    </div>
+    <!-- Security -->
+    <div class="admin-card" style="border-color:#fecaca">
+      <div class="admin-card-title" style="color:#dc2626;background:#fff5f5">Keamanan</div>
+      <div class="form-row">
+        <div class="form-label">Ganti Password Admin</div>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" id="adm-newpass" type="password" placeholder="Password baru" style="flex:1" />
+          <button class="btn-primary" style="width:auto;padding:10px 16px;flex-shrink:0" onclick="changePassword()">Ganti</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab-admin" id="fab-admin" onclick="openAdmin()">
+  <i class="ti ti-settings"></i>
+</button>
+
 <!-- Product Modal -->
 <div class="modal-overlay" id="product-modal" onclick="handleModalClick(event)">
   <div class="modal-sheet">
@@ -844,147 +1040,130 @@
     </div>
   </div>
 </div>
+<!-- Pass Gate -->
+<div class="pass-gate" id="pass-gate" style="display:none">
+  <div class="pass-logo">FA</div>
+  <h3>Admin Area</h3>
+  <p>Masukkan password untuk mengakses panel admin</p>
+  <input type="password" id="pass-input" placeholder="......"
+    onkeydown="if(event.key==='Enter') checkPass()" />
+  <p class="pass-error" id="pass-error" style="display:none">Password salah. Coba lagi.</p>
+  <button class="btn-primary" style="max-width:320px" onclick="checkPass()">Masuk</button>
+  <button class="modal-close-btn" style="max-width:320px" onclick="closePassGate()">Batal</button>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
+let products = [], profile = {}, payment = {}, articles = [];
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbya9R5Vd0W2iQKCvxVAZKWXjy92Ykk5iOfrwZwoAY0kt7gWbLVFg82JEgx1znoBdGhdAw/exec';
+let appScriptUrl = APPS_SCRIPT_URL;
+let orders = [];
+let activeCat = 'all';
+let editingId = null, editingArticleId = null;
+let productImgData = null, avatarImgData = null, articleImgData = null;
+
+const DEFAULT_PASS = 'admin123';
 const CAT_ICONS = { digital:'ti-file-code', jasa:'ti-brush', fisik:'ti-package', portofolio:'ti-photo' };
 const CAT_LABELS = { digital:'Digital', jasa:'Jasa', fisik:'Fisik', portofolio:'Portofolio' };
 const CAT_SECTION = { all:'Semua Produk & Layanan', digital:'Produk Digital', jasa:'Jasa & Layanan', fisik:'Produk Fisik', portofolio:'Portofolio & Karya' };
-const DEFAULT_PROFILE = {
-  name: 'Farid Adam',
-  tagline: 'Helping teams build systems that work — and grow.',
-  ig: '',
-  wa: '',
-  linkedin: '',
-  avatar: ''
-};
-const DEFAULT_PAYMENT = { bank: '', ewallet: '', qris: '' };
 
-let products = [], articles = [], profile = { ...DEFAULT_PROFILE }, payment = { ...DEFAULT_PAYMENT };
-let activeCat = 'all';
-let pendingProduct = null;
-
-function escapeHTML(v) {
-  return String(v || '').replace(/[&<>"]/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[ch]));
+function getPass() { return localStorage.getItem('_fa_pass') || DEFAULT_PASS; }
+function getData() {
+  try { products = JSON.parse(localStorage.getItem('_fa_products') || '[]'); } catch { products = []; }
+  try { profile  = JSON.parse(localStorage.getItem('_fa_profile')  || '{}'); } catch { profile = {}; }
+  try { payment  = JSON.parse(localStorage.getItem('_fa_payment')  || '{}'); } catch { payment = {}; }
+  try { articles = JSON.parse(localStorage.getItem('_fa_articles') || '[]'); } catch { articles = []; }
+  appScriptUrl = APPS_SCRIPT_URL;
+  try { orders = JSON.parse(localStorage.getItem('_fa_orders') || '[]'); } catch { orders = []; }
 }
 
-function normalizeList(data, key) {
-  if (Array.isArray(data)) return data;
-  if (data && Array.isArray(data[key])) return data[key];
-  if (data && Array.isArray(data.items)) return data.items;
-  return [];
-}
-
-function localRead(key, fallback) {
-  try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch { return fallback; }
-}
-
-function localWrite(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
-}
-
-function fetchJsonp(params) {
-  return new Promise((resolve, reject) => {
-    const callback = `faCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    const url = new URL(APPS_SCRIPT_URL);
-    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-    url.searchParams.set('callback', callback);
-    url.searchParams.set('ts', Date.now());
-    const script = document.createElement('script');
-    const timer = setTimeout(() => cleanup(new Error('timeout')), 12000);
-    function cleanup(err, data) {
-      clearTimeout(timer);
-      delete window[callback];
-      script.remove();
-      err ? reject(err) : resolve(data);
-    }
-    window[callback] = data => cleanup(null, data);
-    script.onerror = () => cleanup(new Error('jsonp failed'));
-    script.src = url.toString();
-    document.body.appendChild(script);
-  });
-}
-
-async function remoteGet(resource) {
-  try {
-    const url = new URL(APPS_SCRIPT_URL);
-    url.searchParams.set('action', 'list');
-    url.searchParams.set('resource', resource);
-    url.searchParams.set('ts', Date.now());
-    const res = await fetch(url.toString());
-    return await res.json();
-  } catch {
-    return await fetchJsonp({ action: 'list', resource });
-  }
-}
-
-async function remotePost(action, resource, payload) {
-  try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, resource, ...payload })
-    });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-async function loadStoreData() {
-  products = localRead('_fa_products', []);
-  articles = localRead('_fa_articles', []);
-  profile = { ...DEFAULT_PROFILE, ...localRead('_fa_profile', {}) };
-  payment = { ...DEFAULT_PAYMENT, ...localRead('_fa_payment', {}) };
+function showStore() {
+  document.getElementById('view-store').classList.add('active');
+  document.getElementById('view-admin').classList.remove('active');
+  document.getElementById('fab-admin').style.display = 'flex';
   renderHero(); renderProducts(); renderArticles();
-
-  try {
-    const [productData, articleData, profileData, paymentData] = await Promise.all([
-      remoteGet('products'),
-      remoteGet('articles'),
-      remoteGet('profile'),
-      remoteGet('payment')
-    ]);
-    const remoteProducts = normalizeList(productData, 'products');
-    const remoteArticles = normalizeList(articleData, 'articles');
-    if (remoteProducts.length) { products = remoteProducts; localWrite('_fa_products', products); }
-    if (remoteArticles.length) { articles = remoteArticles; localWrite('_fa_articles', articles); }
-    if (profileData && (profileData.profile || profileData.name)) {
-      profile = { ...DEFAULT_PROFILE, ...(profileData.profile || profileData) };
-      localWrite('_fa_profile', profile);
-    }
-    if (paymentData && (paymentData.payment || paymentData.bank || paymentData.ewallet || paymentData.qris)) {
-      payment = { ...DEFAULT_PAYMENT, ...(paymentData.payment || paymentData) };
-      localWrite('_fa_payment', payment);
-    }
-    renderHero(); renderProducts(); renderArticles();
-  } catch {
-    renderHero(); renderProducts(); renderArticles();
-  }
+}
+function showAdmin() {
+  document.getElementById('view-store').classList.remove('active');
+  document.getElementById('view-admin').classList.add('active');
+  document.getElementById('fab-admin').style.display = 'none';
+  loadAdminForm(); renderAdminProductList(); renderAdminArticleList(); renderAdminOrderList(); loadRemoteAdminData();
 }
 
+// Pass
+function openAdmin() {
+  document.getElementById('pass-gate').style.display = 'flex';
+  document.getElementById('pass-input').value = '';
+  document.getElementById('pass-error').style.display = 'none';
+  setTimeout(() => document.getElementById('pass-input').focus(), 100);
+}
+function closePassGate() { document.getElementById('pass-gate').style.display = 'none'; }
+function checkPass() {
+  if (document.getElementById('pass-input').value === getPass()) {
+    closePassGate(); showAdmin();
+  } else {
+    document.getElementById('pass-error').style.display = 'block';
+    document.getElementById('pass-input').value = '';
+    document.getElementById('pass-input').focus();
+  }
+}
+function changePassword() {
+  const v = document.getElementById('adm-newpass').value.trim();
+  if (!v || v.length < 4) { showToast('Minimal 4 karakter'); return; }
+  localStorage.setItem('_fa_pass', v);
+  document.getElementById('adm-newpass').value = '';
+  showToast('Password berhasil diganti OK');
+}
+
+// Hero
 function renderHero() {
   const avatarWrap = document.getElementById('hero-avatar-wrap');
-  avatarWrap.innerHTML = profile.avatar ? `<img class="hero-logo-img" src="${profile.avatar}" alt="Foto profil">` : `<div class="hero-logo">FA</div>`;
-  const parts = (profile.name || DEFAULT_PROFILE.name).trim().split(' ');
-  const last = parts.pop();
-  document.getElementById('hero-name').innerHTML = parts.join(' ') + (parts.length ? ' ' : '') + `<span>${last}</span>`;
-  document.getElementById('hero-tagline').textContent = profile.tagline || DEFAULT_PROFILE.tagline;
+  if (profile.avatar) {
+    avatarWrap.innerHTML = `<img class="hero-logo-img" src="${profile.avatar}" alt="Foto profil">`;
+  } else {
+    avatarWrap.innerHTML = `<div class="hero-logo">FA</div>`;
+  }
+
+  const nameEl = document.getElementById('hero-name');
+  if (profile.name) {
+    const parts = profile.name.trim().split(' ');
+    const last = parts.pop();
+    nameEl.innerHTML = parts.join(' ') + (parts.length ? ' ' : '') + `<span>${last}</span>`;
+  } else {
+    nameEl.innerHTML = 'Farid <span>Adam</span>';
+  }
+
+  document.getElementById('hero-tagline').textContent = profile.tagline || 'Helping teams build systems that work — and grow.';
+
   const socials = document.getElementById('hero-socials');
   socials.innerHTML = '';
-  if (profile.ig) socials.innerHTML += `<a class="social-btn" href="https://instagram.com/${profile.ig.replace('@','')}" target="_blank"><i class="ti ti-brand-instagram"></i>Instagram</a>`;
-  if (profile.wa) socials.innerHTML += `<a class="social-btn" href="https://wa.me/${profile.wa}" target="_blank"><i class="ti ti-brand-whatsapp"></i>WhatsApp</a>`;
+  if (profile.ig) {
+    socials.innerHTML += `<a class="social-btn" href="https://instagram.com/${profile.ig.replace('@','')}" target="_blank"><i class="ti ti-brand-instagram"></i>Instagram</a>`;
+  }
+  if (profile.wa) {
+    socials.innerHTML += `<a class="social-btn" href="https://wa.me/${profile.wa}" target="_blank"><i class="ti ti-brand-whatsapp"></i>WhatsApp</a>`;
+  }
   if (profile.linkedin) {
     const liUrl = profile.linkedin.startsWith('http') ? profile.linkedin : 'https://' + profile.linkedin;
     socials.innerHTML += `<a class="social-btn" href="${liUrl}" target="_blank"><i class="ti ti-brand-linkedin"></i>LinkedIn</a>`;
   }
 }
 
+// Category tabs
+document.getElementById('cat-tabs').addEventListener('click', e => {
+  const btn = e.target.closest('.cat-tab');
+  if (!btn) return;
+  document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeCat = btn.dataset.cat;
+  document.getElementById('section-label').textContent = CAT_SECTION[activeCat];
+  renderProducts();
+});
+
 function formatPrice(p) {
-  if (!p || Number(p) === 0) return 'Gratis';
+  if (!p || p == 0) return 'Gratis';
   return 'Rp ' + Number(p).toLocaleString('id-ID');
 }
 
@@ -992,93 +1171,68 @@ function renderProducts() {
   const grid = document.getElementById('products-grid');
   const filtered = activeCat === 'all' ? products : products.filter(p => p.cat === activeCat);
   if (!filtered.length) {
-    grid.innerHTML = `<div class="empty-state"><i class="ti ti-package-off"></i><p>Belum ada produk di kategori ini.</p></div>`;
+    grid.innerHTML = `<div class="empty-state">
+      <i class="ti ti-package-off"></i>
+      <p>Belum ada produk di kategori ini.</p>
+    </div>`;
     return;
   }
   grid.innerHTML = filtered.map(p => `
     <div class="product-card" onclick="openProduct('${p.id}')">
-      <div class="product-thumb">${p.img ? `<img src="${p.img}" alt="${escapeHTML(p.name)}">` : `<i class="ti ${CAT_ICONS[p.cat] || 'ti-tag'}"></i>`}</div>
+      <div class="product-thumb">
+        ${p.img ? `<img src="${p.img}" alt="${p.name}">` : `<i class="ti ${CAT_ICONS[p.cat] || 'ti-tag'}"></i>`}
+      </div>
       <div class="product-info">
-        <div class="cat-badge badge-${p.cat}">${CAT_LABELS[p.cat] || 'Produk'}</div>
-        <div class="product-name">${escapeHTML(p.name)}</div>
-        <div class="product-price ${Number(p.price) === 0 ? 'free' : ''}">${formatPrice(p.price)}</div>
+        <div class="cat-badge badge-${p.cat}">${CAT_LABELS[p.cat]}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-price ${p.price == 0 ? 'free' : ''}">${formatPrice(p.price)}</div>
       </div>
     </div>
   `).join('');
 }
 
-function paymentMethodsHtml() {
-  let pm = '';
-  if (payment.bank) pm += `<div class="payment-method"><i class="ti ti-building-bank"></i><div class="payment-label"><strong>Transfer Bank</strong><span>${escapeHTML(payment.bank)}</span></div><button class="btn-copy" onclick="copyText('${escapeHTML(payment.bank)}',this)">Salin</button></div>`;
-  if (payment.ewallet) pm += `<div class="payment-method"><i class="ti ti-wallet"></i><div class="payment-label"><strong>E-Wallet</strong><span>${escapeHTML(payment.ewallet)}</span></div><button class="btn-copy" onclick="copyText('${escapeHTML(payment.ewallet)}',this)">Salin</button></div>`;
-  if (payment.qris) pm += `<div class="payment-method"><i class="ti ti-qrcode"></i><div class="payment-label"><strong>QRIS</strong><span>Scan untuk bayar</span></div><a href="${payment.qris}" target="_blank" class="btn-copy">Buka</a></div>`;
-  return pm ? `<div class="modal-payment"><div class="payment-title"><i class="ti ti-credit-card"></i>Cara Pembayaran</div>${pm}</div>` : '';
-}
-
 function openProduct(id) {
   const p = products.find(x => x.id === id);
   if (!p) return;
-  pendingProduct = p;
-  document.getElementById('modal-img').innerHTML = p.img ? `<img src="${p.img}" alt="${escapeHTML(p.name)}">` : `<i class="ti ${CAT_ICONS[p.cat] || 'ti-tag'}"></i>`;
-  document.getElementById('modal-badge').innerHTML = `<div class="cat-badge badge-${p.cat}" style="margin-bottom:8px">${CAT_LABELS[p.cat] || 'Produk'}</div>`;
+
+  document.getElementById('modal-img').innerHTML = p.img
+    ? `<img src="${p.img}" alt="${p.name}">`
+    : `<i class="ti ${CAT_ICONS[p.cat]}"></i>`;
+
+  document.getElementById('modal-badge').innerHTML = `<div class="cat-badge badge-${p.cat}" style="margin-bottom:8px">${CAT_LABELS[p.cat]}</div>`;
   document.getElementById('modal-title').textContent = p.name;
   document.getElementById('modal-desc').textContent = p.desc || 'Tidak ada deskripsi tersedia.';
   const prEl = document.getElementById('modal-price');
   prEl.textContent = formatPrice(p.price);
-  prEl.className = 'modal-price' + (Number(p.price) === 0 ? ' free' : '');
+  prEl.className = 'modal-price' + (p.price == 0 ? ' free' : '');
+
   let html = '';
-  if (Number(p.price) === 0 && p.link) {
+  if (p.price == 0 && p.link) {
     html += `<a href="${p.link}" target="_blank" class="btn-buy"><i class="ti ti-gift"></i>Ambil Gratis</a>`;
-  } else if (Number(p.price) === 0) {
+  } else if (p.price == 0 && profile.wa) {
     const msg = encodeURIComponent(`Halo Farid, saya ingin akses gratis untuk *${p.name}*. Bisa dibantu?`);
-    html += profile.wa ? `<a class="btn-wa" href="https://wa.me/${profile.wa}?text=${msg}" target="_blank"><i class="ti ti-brand-whatsapp"></i>Minta Akses Gratis</a>` : '';
+    html += `<a class="btn-wa" href="https://wa.me/${profile.wa}?text=${msg}" target="_blank"><i class="ti ti-brand-whatsapp"></i>Minta Akses Gratis</a>`;
+  } else if (p.price > 0) {
+    let pm = '';
+    if (payment.bank) pm += `<div class="payment-method"><i class="ti ti-building-bank"></i><div class="payment-label"><strong>Transfer Bank</strong><span>${payment.bank}</span></div><button class="btn-copy" onclick="copyText('${payment.bank}',this)">Salin</button></div>`;
+    if (payment.ewallet) pm += `<div class="payment-method"><i class="ti ti-wallet"></i><div class="payment-label"><strong>E-Wallet</strong><span>${payment.ewallet}</span></div><button class="btn-copy" onclick="copyText('${payment.ewallet}',this)">Salin</button></div>`;
+    if (payment.qris) pm += `<div class="payment-method"><i class="ti ti-qrcode"></i><div class="payment-label"><strong>QRIS</strong><span>Scan untuk bayar</span></div><a href="${payment.qris}" target="_blank" class="btn-copy">Buka</a></div>`;
+    if (pm) html += `<div class="modal-payment"><div class="payment-title"><i class="ti ti-credit-card"></i>Cara Pembayaran</div>${pm}</div>`;
+    if (profile.wa) {
+      const msg = encodeURIComponent(`Halo Farid, saya tertarik dengan *${p.name}* (${formatPrice(p.price)}). Apakah masih tersedia?`);
+      html += `<a class="btn-wa" href="https://wa.me/${profile.wa}?text=${msg}" target="_blank"><i class="ti ti-brand-whatsapp"></i>Konfirmasi via WhatsApp</a>`;
+    }
   } else {
-    html += paymentMethodsHtml();
-    html += `<div class="checkout-box" id="checkout-box">
-      <div class="checkout-title"><i class="ti ti-receipt"></i>Konfirmasi Setelah Bayar</div>
-      <div class="checkout-grid">
-        <input class="checkout-input" id="buyer-name" placeholder="Nama lengkap" />
-        <input class="checkout-input" id="buyer-wa" placeholder="Nomor WhatsApp aktif" />
-        <input class="checkout-input" id="buyer-email" placeholder="Email untuk akses / invoice" />
-        <textarea class="checkout-textarea" id="buyer-note" placeholder="Catatan atau nama rekening pengirim"></textarea>
-        <div class="checkout-help">Setelah pembayaran dilakukan, kirim data ini agar order tercatat dan Farid bisa follow up aksesnya.</div>
-        <button class="btn-primary" onclick="submitPaidOrder()"><i class="ti ti-send"></i>Saya Sudah Bayar</button>
-      </div>
-    </div>`;
+    if (profile.wa) {
+      const msg = encodeURIComponent(`Halo Farid, saya tertarik dengan *${p.name}*. Bisa ceritakan lebih lanjut?`);
+      html = `<a class="btn-wa" href="https://wa.me/${profile.wa}?text=${msg}" target="_blank"><i class="ti ti-brand-whatsapp"></i>Tanya via WhatsApp</a>`;
+    }
   }
   document.getElementById('modal-actions').innerHTML = html;
   document.getElementById('product-modal').classList.add('open');
 }
 
-async function submitPaidOrder() {
-  if (!pendingProduct) return;
-  const buyerName = document.getElementById('buyer-name').value.trim();
-  const buyerWa = document.getElementById('buyer-wa').value.trim().replace(/[^0-9]/g, '');
-  const buyerEmail = document.getElementById('buyer-email').value.trim();
-  const note = document.getElementById('buyer-note').value.trim();
-  if (!buyerName || !buyerWa) { showToast('Nama dan WhatsApp wajib diisi'); return; }
-  const order = {
-    id: Date.now().toString(36),
-    productId: pendingProduct.id,
-    productName: pendingProduct.name,
-    price: Number(pendingProduct.price) || 0,
-    buyerName,
-    buyerWa,
-    buyerEmail,
-    note,
-    status: 'paid_unverified',
-    createdAt: new Date().toISOString()
-  };
-  const orders = localRead('_fa_orders', []);
-  orders.push(order);
-  localWrite('_fa_orders', orders);
-  await remotePost('create', 'orders', { order });
-  const waMsg = encodeURIComponent(`Halo Farid, saya sudah bayar *${pendingProduct.name}* (${formatPrice(pendingProduct.price)}).\nNama: ${buyerName}\nWA: ${buyerWa}\nEmail: ${buyerEmail || '-'}\nCatatan: ${note || '-'}`);
-  const waLink = profile.wa ? `<a class="btn-wa" href="https://wa.me/${profile.wa}?text=${waMsg}" target="_blank"><i class="ti ti-brand-whatsapp"></i>Kirim Bukti via WhatsApp</a>` : '';
-  document.getElementById('checkout-box').innerHTML = `<div class="order-success">Order tercatat. Langkah terakhir: kirim bukti pembayaran agar akses bisa diproses.</div>${waLink}`;
-}
-
-function closeModal() { document.getElementById('product-modal').classList.remove('open'); pendingProduct = null; }
+function closeModal() { document.getElementById('product-modal').classList.remove('open'); }
 function handleModalClick(e) { if (e.target === document.getElementById('product-modal')) closeModal(); }
 function copyText(text, btn) {
   navigator.clipboard.writeText(text).then(() => {
@@ -1087,17 +1241,174 @@ function copyText(text, btn) {
   });
 }
 
+// Admin form
+function loadAdminForm() {
+  document.getElementById('adm-name').value     = profile.name     || '';
+  document.getElementById('adm-tagline').value  = profile.tagline  || '';
+  document.getElementById('adm-ig').value       = profile.ig       || '';
+  document.getElementById('adm-wa').value       = profile.wa       || '';
+  document.getElementById('adm-linkedin').value = profile.linkedin || '';
+  document.getElementById('adm-bank').value     = payment.bank     || '';
+  document.getElementById('adm-ewallet').value  = payment.ewallet  || '';
+  document.getElementById('adm-qris').value     = payment.qris     || '';
+  if (profile.avatar) {
+    document.getElementById('avatar-upload-content').innerHTML =
+      `<img src="${profile.avatar}" class="img-preview"><span>Tap untuk ganti</span>`;
+    avatarImgData = profile.avatar;
+  }
+}
+
+function saveProfile() {
+  profile = {
+    name:     document.getElementById('adm-name').value.trim()     || 'Farid Adam',
+    tagline:  document.getElementById('adm-tagline').value.trim(),
+    ig:       document.getElementById('adm-ig').value.trim(),
+    wa:       document.getElementById('adm-wa').value.trim().replace(/[^0-9]/g,''),
+    linkedin: document.getElementById('adm-linkedin').value.trim(),
+    avatar:   avatarImgData || profile.avatar || ''
+  };
+  localStorage.setItem('_fa_profile', JSON.stringify(profile));
+  showToast('Profil tersimpan OK');
+}
+
+function savePayment() {
+  payment = {
+    bank:    document.getElementById('adm-bank').value.trim(),
+    ewallet: document.getElementById('adm-ewallet').value.trim(),
+    qris:    document.getElementById('adm-qris').value.trim()
+  };
+  localStorage.setItem('_fa_payment', JSON.stringify(payment));
+  showToast('Pembayaran tersimpan OK');
+}
+
+function setupImageUpload(inputId, contentId, cb) {
+  document.getElementById(inputId).addEventListener('change', function(e) {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById(contentId).innerHTML =
+        `<img src="${ev.target.result}" class="img-preview"><span>Tap untuk ganti</span>`;
+      cb(ev.target.result);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+setupImageUpload('avatar-file-input',  'avatar-upload-content',  d => avatarImgData  = d);
+setupImageUpload('product-file-input', 'product-upload-content', d => productImgData = d);
+setupImageUpload('article-file-input', 'article-upload-content', d => articleImgData = d);
+
+async function saveProduct() {
+  const name = document.getElementById('adm-pname').value.trim();
+  if (!name) { showToast('Nama produk wajib diisi'); return; }
+  if (editingId) {
+    const idx = products.findIndex(p => p.id === editingId);
+    if (idx !== -1) products[idx] = { ...products[idx], name,
+      cat:   document.getElementById('adm-pcat').value,
+      desc:  document.getElementById('adm-pdesc').value.trim(),
+      price: parseFloat(document.getElementById('adm-pprice').value) || 0,
+      img:   productImgData || products[idx].img || '',
+      link:  document.getElementById('adm-plink').value.trim()
+    };
+    showToast('Produk diperbarui OK'); cancelEdit();
+  } else {
+    products.push({ id: Date.now().toString(36), name,
+      cat:   document.getElementById('adm-pcat').value,
+      desc:  document.getElementById('adm-pdesc').value.trim(),
+      price: parseFloat(document.getElementById('adm-pprice').value) || 0,
+      img:   productImgData || '',
+      link:  document.getElementById('adm-plink').value.trim()
+    });
+    showToast('Produk ditambahkan OK'); clearProductForm();
+  }
+  localStorage.setItem('_fa_products', JSON.stringify(products));
+  renderAdminProductList();
+}
+
+function editProduct(id) {
+  const p = products.find(x => x.id === id); if (!p) return;
+  editingId = id; productImgData = p.img || null;
+  document.getElementById('adm-pname').value  = p.name;
+  document.getElementById('adm-pcat').value   = p.cat;
+  document.getElementById('adm-pdesc').value  = p.desc  || '';
+  document.getElementById('adm-pprice').value = p.price || 0;
+  document.getElementById('adm-plink').value  = p.link  || '';
+  if (p.img) document.getElementById('product-upload-content').innerHTML =
+    `<img src="${p.img}" class="img-preview"><span>Tap untuk ganti</span>`;
+  document.getElementById('product-form-title').textContent = 'Edit Produk';
+  document.getElementById('btn-cancel-edit').style.display = 'block';
+  document.getElementById('btn-save-product').textContent = 'Update Produk';
+  document.getElementById('adm-pname').scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+function cancelEdit() {
+  editingId = null; productImgData = null;
+  clearProductForm();
+  document.getElementById('product-form-title').textContent = 'Tambah Produk';
+  document.getElementById('btn-cancel-edit').style.display = 'none';
+  document.getElementById('btn-save-product').textContent = 'Simpan Produk';
+}
+
+function clearProductForm() {
+  ['adm-pname','adm-pdesc','adm-pprice','adm-plink'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('adm-pcat').value = 'digital';
+  document.getElementById('product-upload-content').innerHTML = `<i class="ti ti-photo"></i><span>Upload foto produk</span>`;
+  productImgData = null;
+}
+
+async function deleteProduct(id) {
+  if (!confirm('Hapus produk ini?')) return;
+  products = products.filter(p => p.id !== id);
+  localStorage.setItem('_fa_products', JSON.stringify(products));
+  renderAdminProductList(); showToast('Produk dihapus');
+}
+
+function renderAdminProductList() {
+  const el = document.getElementById('admin-product-list');
+  if (!products.length) {
+    el.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px">Belum ada produk</div>`;
+    return;
+  }
+  el.innerHTML = products.map(p => `
+    <div class="pli">
+      <div class="pli-thumb">${p.img ? `<img src="${p.img}">` : `<i class="ti ${CAT_ICONS[p.cat]}"></i>`}</div>
+      <div class="pli-info">
+        <div class="pli-name">${p.name}</div>
+        <div class="pli-meta">${CAT_LABELS[p.cat]} &middot; ${formatPrice(p.price)}</div>
+      </div>
+      <div class="pli-actions">
+        <button class="btn-edit" onclick="editProduct('${p.id}')"><i class="ti ti-pencil"></i></button>
+        <button class="btn-danger" onclick="deleteProduct('${p.id}')"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>
+  `).join('');
+}
+
+
+function escapeHTML(v) {
+  return String(v || '').replace(/[&<>"]/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[ch]));
+}
+
 function formatArticleDate(v) {
   const d = v ? new Date(v) : new Date();
   if (Number.isNaN(d.getTime())) return 'Baru saja';
   return d.toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' });
 }
 
+function getPublishedArticles() {
+  return articles
+    .filter(a => (a.status || 'published') === 'published')
+    .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
+}
+
 function renderArticles() {
   const feed = document.getElementById('article-feed');
-  const visible = articles.filter(a => (a.status || 'published') === 'published').sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
+  if (!feed) return;
+  const visible = getPublishedArticles();
   if (!visible.length) {
-    feed.innerHTML = `<div class="empty-state"><i class="ti ti-news-off"></i><p>Belum ada artikel atau posting.</p></div>`;
+    feed.innerHTML = `<div class="empty-state">
+      <i class="ti ti-news-off"></i>
+      <p>Belum ada artikel atau posting.</p>
+    </div>`;
     return;
   }
   feed.innerHTML = visible.map(a => `
@@ -1109,41 +1420,281 @@ function renderArticles() {
         <div class="article-excerpt">${escapeHTML(a.excerpt || (a.body || '').slice(0, 150))}</div>
         <div class="article-meta"><i class="ti ti-calendar"></i>${formatArticleDate(a.updatedAt || a.createdAt)}<span>&middot;</span><span>Baca selengkapnya</span></div>
       </div>
-    </div>`).join('');
+    </div>
+  `).join('');
 }
 
 function openArticle(id) {
   const a = articles.find(x => x.id === id);
   if (!a) return;
-  document.getElementById('article-modal-cover').innerHTML = a.img ? `<img src="${a.img}" alt="${escapeHTML(a.title)}">` : `<i class="ti ti-news"></i>`;
+  document.getElementById('article-modal-cover').innerHTML = a.img
+    ? `<img src="${a.img}" alt="${escapeHTML(a.title)}">`
+    : `<i class="ti ti-news"></i>`;
   document.getElementById('article-modal-kicker').innerHTML = `<div class="article-kicker"><i class="ti ti-message-circle"></i>${escapeHTML(a.topic || 'Insight')}</div>`;
   document.getElementById('article-modal-title').textContent = a.title;
   document.getElementById('article-modal-meta').innerHTML = `<span>${formatArticleDate(a.updatedAt || a.createdAt)}</span><span>&middot;</span><span>Farid Adam</span>`;
   document.getElementById('article-modal-copy').textContent = a.body || a.excerpt || '';
   document.getElementById('article-modal').classList.add('open');
 }
+
 function closeArticleModal() { document.getElementById('article-modal').classList.remove('open'); }
 function handleArticleModalClick(e) { if (e.target === document.getElementById('article-modal')) closeArticleModal(); }
+
+function saveAppScriptUrl() { updateArticleSyncNote('Endpoint Apps Script sudah tertanam di admin.'); }
+
+function updateArticleSyncNote(msg) {
+  const el = document.getElementById('article-sync-note');
+  if (el) el.textContent = msg;
+}
+
+function applyRemoteArticles(data) {
+  const remote = Array.isArray(data) ? data : (data.articles || []);
+  if (!Array.isArray(remote)) return false;
+  articles = remote;
+  localStorage.setItem('_fa_articles', JSON.stringify(articles));
+  renderArticles();
+  renderAdminArticleList();
+  updateArticleSyncNote('Artikel berhasil dimuat dari Apps Script.');
+  return true;
+}
+
+function loadRemoteArticlesJsonp() {
+  return new Promise((resolve, reject) => {
+    if (!appScriptUrl || !document.body) return reject(new Error('Endpoint belum siap'));
+    const cb = `faArticlesCallback_${Date.now()}`;
+    const sep = appScriptUrl.includes('?') ? '&' : '?';
+    const script = document.createElement('script');
+    const cleanup = () => { delete window[cb]; script.remove(); clearTimeout(timer); };
+    window[cb] = data => { cleanup(); resolve(data); };
+    script.onerror = () => { cleanup(); reject(new Error('JSONP gagal')); };
+    script.src = `${appScriptUrl}${sep}action=list&resource=articles&callback=${cb}&ts=${Date.now()}`;
+    const timer = setTimeout(() => { cleanup(); reject(new Error('JSONP timeout')); }, 10000);
+    document.body.appendChild(script);
+  });
+}
+
+
+async function remoteGet(resource) {
+  try {
+    const sep = appScriptUrl.includes('?') ? '&' : '?';
+    const res = await fetch(`${appScriptUrl}${sep}action=list&resource=${resource}&ts=${Date.now()}`);
+    return await res.json();
+  } catch (err) {
+    return await loadRemoteJsonp(resource);
+  }
+}
+
+function loadRemoteJsonp(resource) {
+  return new Promise((resolve, reject) => {
+    if (!appScriptUrl || !document.body) return reject(new Error('Endpoint belum siap'));
+    const cb = `faAdminCallback_${resource}_${Date.now()}`;
+    const sep = appScriptUrl.includes('?') ? '&' : '?';
+    const script = document.createElement('script');
+    const cleanup = () => { delete window[cb]; script.remove(); clearTimeout(timer); };
+    window[cb] = data => { cleanup(); resolve(data); };
+    script.onerror = () => { cleanup(); reject(new Error('JSONP gagal')); };
+    script.src = `${appScriptUrl}${sep}action=list&resource=${resource}&callback=${cb}&ts=${Date.now()}`;
+    const timer = setTimeout(() => { cleanup(); reject(new Error('JSONP timeout')); }, 10000);
+    document.body.appendChild(script);
+  });
+}
+
+function asList(data, key) {
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data[key])) return data[key];
+  if (data && Array.isArray(data.items)) return data.items;
+  return [];
+}
+
+async function syncResource(action, resource, payload) {
+  if (!appScriptUrl) return;
+  try {
+    await fetch(appScriptUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, resource, ...payload })
+    });
+    updateArticleSyncNote('Perubahan dikirim ke Apps Script.');
+  } catch (err) {
+    updateArticleSyncNote('Sinkron Apps Script gagal. Data lokal tetap tersimpan.');
+  }
+}
+
+async function loadRemoteAdminData() {
+  try {
+    const [productData, articleData, profileData, paymentData, orderData] = await Promise.all([
+      remoteGet('products'), remoteGet('articles'), remoteGet('profile'), remoteGet('payment'), remoteGet('orders')
+    ]);
+    const remoteProducts = asList(productData, 'products');
+    const remoteArticles = asList(articleData, 'articles');
+    const remoteOrders = asList(orderData, 'orders');
+    if (remoteProducts.length) { products = remoteProducts; localStorage.setItem('_fa_products', JSON.stringify(products)); }
+    if (remoteArticles.length) { articles = remoteArticles; localStorage.setItem('_fa_articles', JSON.stringify(articles)); }
+    if (remoteOrders.length) { orders = remoteOrders; localStorage.setItem('_fa_orders', JSON.stringify(orders)); }
+    if (profileData && (profileData.profile || profileData.name)) { profile = profileData.profile || profileData; localStorage.setItem('_fa_profile', JSON.stringify(profile)); }
+    if (paymentData && (paymentData.payment || paymentData.bank || paymentData.ewallet || paymentData.qris)) { payment = paymentData.payment || paymentData; localStorage.setItem('_fa_payment', JSON.stringify(payment)); }
+    loadAdminForm(); renderAdminProductList(); renderAdminArticleList(); renderAdminOrderList(); renderHero(); renderProducts(); renderArticles();
+    updateArticleSyncNote('Data berhasil dimuat dari Apps Script.');
+  } catch (err) {
+    updateArticleSyncNote('Belum bisa membaca Apps Script. Admin memakai data lokal.');
+  }
+}
+async function loadRemoteArticles() {
+  if (!appScriptUrl) return;
+  try {
+    const sep = appScriptUrl.includes('?') ? '&' : '?';
+    const res = await fetch(`${appScriptUrl}${sep}action=list&resource=articles&ts=${Date.now()}`);
+    const data = await res.json();
+    if (applyRemoteArticles(data)) return;
+  } catch (err) {
+    try {
+      const data = await loadRemoteArticlesJsonp();
+      if (applyRemoteArticles(data)) return;
+    } catch (jsonpErr) {
+      updateArticleSyncNote('Belum bisa membaca Apps Script. Artikel lokal tetap dipakai.');
+    }
+  }
+}
+
+async function syncArticle(action, article) { await syncResource(action, 'articles', { article }); }
+
+async function saveArticle() {
+  const title = document.getElementById('adm-atitle').value.trim();
+  if (!title) { showToast('Judul artikel wajib diisi'); return; }
+  const now = new Date().toISOString();
+  const payload = {
+    id: editingArticleId || Date.now().toString(36),
+    title,
+    topic: document.getElementById('adm-atopic').value.trim() || 'Insight',
+    excerpt: document.getElementById('adm-aexcerpt').value.trim(),
+    body: document.getElementById('adm-abody').value.trim(),
+    img: articleImgData || '',
+    status: document.getElementById('adm-astatus').value,
+    createdAt: now,
+    updatedAt: now
+  };
+  if (editingArticleId) {
+    const idx = articles.findIndex(a => a.id === editingArticleId);
+    if (idx !== -1) payload.createdAt = articles[idx].createdAt || now;
+    if (idx !== -1) articles[idx] = { ...articles[idx], ...payload, img: articleImgData || articles[idx].img || '' };
+    showToast('Artikel diperbarui OK');
+  } else {
+    articles.push(payload);
+    showToast('Artikel ditambahkan OK');
+  }
+  localStorage.setItem('_fa_articles', JSON.stringify(articles));
+  await syncArticle('upsert', editingArticleId ? articles.find(a => a.id === editingArticleId) : payload);
+  cancelArticleEdit();
+  renderArticles();
+  renderAdminArticleList();
+}
+
+function editArticle(id) {
+  const a = articles.find(x => x.id === id); if (!a) return;
+  editingArticleId = id;
+  articleImgData = a.img || null;
+  document.getElementById('adm-atitle').value = a.title || '';
+  document.getElementById('adm-atopic').value = a.topic || '';
+  document.getElementById('adm-aexcerpt').value = a.excerpt || '';
+  document.getElementById('adm-abody').value = a.body || '';
+  document.getElementById('adm-astatus').value = a.status || 'published';
+  if (a.img) document.getElementById('article-upload-content').innerHTML = `<img src="${a.img}" class="img-preview"><span>Tap untuk ganti</span>`;
+  document.getElementById('article-form-title').textContent = 'Edit Artikel';
+  document.getElementById('btn-cancel-article-edit').style.display = 'block';
+  document.getElementById('btn-save-article').innerHTML = '<i class="ti ti-send"></i>Update Artikel';
+  document.getElementById('adm-atitle').scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+function cancelArticleEdit() {
+  editingArticleId = null;
+  articleImgData = null;
+  clearArticleForm();
+  document.getElementById('article-form-title').textContent = 'Tambah Artikel';
+  document.getElementById('btn-cancel-article-edit').style.display = 'none';
+  document.getElementById('btn-save-article').innerHTML = '<i class="ti ti-send"></i>Simpan Artikel';
+}
+
+function clearArticleForm() {
+  ['adm-atitle','adm-atopic','adm-aexcerpt','adm-abody'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('adm-astatus').value = 'published';
+  document.getElementById('article-upload-content').innerHTML = `<i class="ti ti-photo-plus"></i><span>Upload gambar artikel</span>`;
+}
+
+async function deleteArticle(id) {
+  if (!confirm('Hapus artikel ini?')) return;
+  const deleted = articles.find(a => a.id === id);
+  articles = articles.filter(a => a.id !== id);
+  localStorage.setItem('_fa_articles', JSON.stringify(articles));
+  await syncArticle('delete', deleted || { id });
+  renderArticles(); renderAdminArticleList(); showToast('Artikel dihapus');
+}
+
+function renderAdminArticleList() {
+  const el = document.getElementById('admin-article-list');
+  if (!el) return;
+  if (!articles.length) {
+    el.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px">Belum ada artikel</div>`;
+    return;
+  }
+  el.innerHTML = articles
+    .slice()
+    .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0))
+    .map(a => `
+      <div class="pli">
+        <div class="pli-thumb">${a.img ? `<img src="${a.img}">` : `<i class="ti ti-news"></i>`}</div>
+        <div class="pli-info">
+          <div class="pli-name">${escapeHTML(a.title)}</div>
+          <div class="pli-meta">${escapeHTML(a.topic || 'Insight')} &middot; ${formatArticleDate(a.updatedAt || a.createdAt)} &middot; ${(a.status || 'published') === 'published' ? 'Published' : 'Draft'}</div>
+        </div>
+        <div class="pli-actions">
+          <button class="btn-edit" onclick="editArticle('${a.id}')"><i class="ti ti-pencil"></i></button>
+          <button class="btn-danger" onclick="deleteArticle('${a.id}')"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+    `).join('');
+}
+
+function renderAdminOrderList() {
+  const el = document.getElementById('admin-order-list');
+  if (!el) return;
+  if (!orders.length) {
+    el.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px">Belum ada order</div>`;
+    return;
+  }
+  el.innerHTML = orders
+    .slice()
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+    .map(o => `
+      <div class="pli">
+        <div class="pli-thumb"><i class="ti ti-receipt"></i></div>
+        <div class="pli-info">
+          <div class="pli-name">${escapeHTML(o.productName || 'Order')}</div>
+          <div class="pli-meta">${escapeHTML(o.buyerName || '-')} &middot; ${formatPrice(o.price || 0)} &middot; ${escapeHTML(o.status || 'paid_unverified')}</div>
+          <div class="pli-meta">WA: ${escapeHTML(o.buyerWa || '-')} &middot; Email: ${escapeHTML(o.buyerEmail || '-')}</div>
+        </div>
+        <div class="pli-actions">
+          ${o.buyerWa ? `<a class="btn-edit" href="https://wa.me/${String(o.buyerWa).replace(/[^0-9]/g,'')}" target="_blank"><i class="ti ti-brand-whatsapp"></i></a>` : ''}
+        </div>
+      </div>
+    `).join('');
+}
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-document.getElementById('cat-tabs').addEventListener('click', e => {
-  const btn = e.target.closest('.cat-tab');
-  if (!btn) return;
-  document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  activeCat = btn.dataset.cat;
-  document.getElementById('section-label').textContent = CAT_SECTION[activeCat];
-  renderProducts();
-});
-
-loadStoreData();
+getData();
+document.getElementById('view-store').classList.remove('active');
+document.getElementById('view-admin').classList.add('active');
+document.getElementById('fab-admin').style.display = 'none';
+showAdmin();
 </script>
 </body>
 </html>
+
+
 
 
 
