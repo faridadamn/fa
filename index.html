@@ -849,6 +849,7 @@
 
 <script>
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbya9R5Vd0W2iQKCvxVAZKWXjy92Ykk5iOfrwZwoAY0kt7gWbLVFg82JEgx1znoBdGhdAw/exec';
+const STORE_ID = 'farid-adam';
 const CAT_ICONS = { digital:'ti-file-code', jasa:'ti-brush', fisik:'ti-package', portofolio:'ti-photo' };
 const CAT_LABELS = { digital:'Digital', jasa:'Jasa', fisik:'Fisik', portofolio:'Portofolio' };
 const CAT_SECTION = { all:'Semua Produk & Layanan', digital:'Produk Digital', jasa:'Jasa & Layanan', fisik:'Produk Fisik', portofolio:'Portofolio & Karya' };
@@ -890,6 +891,7 @@ function fetchJsonp(params) {
     const callback = `faCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
     const url = new URL(APPS_SCRIPT_URL);
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+    url.searchParams.set('storeId', STORE_ID);
     url.searchParams.set('callback', callback);
     url.searchParams.set('ts', Date.now());
     const script = document.createElement('script');
@@ -912,6 +914,7 @@ async function remoteGet(resource) {
     const url = new URL(APPS_SCRIPT_URL);
     url.searchParams.set('action', 'list');
     url.searchParams.set('resource', resource);
+    url.searchParams.set('storeId', STORE_ID);
     url.searchParams.set('ts', Date.now());
     const res = await fetch(url.toString());
     return await res.json();
@@ -926,7 +929,7 @@ async function remotePost(action, resource, payload) {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, resource, ...payload })
+      body: JSON.stringify({ action, resource, storeId: STORE_ID, ...payload })
     });
     return true;
   } catch {
@@ -1071,6 +1074,8 @@ async function submitPaidOrder() {
   if (!buyerName || !buyerWa) { showToast('Nama dan WhatsApp wajib diisi'); return; }
   const order = {
     id: Date.now().toString(36),
+    transactionId: Date.now().toString(36),
+    storeId: STORE_ID,
     productId: pendingProduct.id,
     productName: pendingProduct.name,
     price: Number(pendingProduct.price) || 0,
@@ -1084,7 +1089,7 @@ async function submitPaidOrder() {
   const orders = localRead('_fa_orders', []);
   orders.push(order);
   localWrite('_fa_orders', orders);
-  await remotePost('create', 'orders', { order });
+  await remotePost('create', 'transactions', { transaction: order });
   const waMsg = encodeURIComponent(`Halo Farid, saya sudah bayar *${pendingProduct.name}* (${formatPrice(pendingProduct.price)}).\nNama: ${buyerName}\nWA: ${buyerWa}\nEmail: ${buyerEmail || '-'}\nCatatan: ${note || '-'}`);
   const waLink = profile.wa ? `<a class="btn-wa" href="https://wa.me/${profile.wa}?text=${waMsg}" target="_blank"><i class="ti ti-brand-whatsapp"></i>Kirim Bukti via WhatsApp</a>` : '';
   document.getElementById('checkout-box').innerHTML = `<div class="order-success">Order tercatat. Langkah terakhir: kirim bukti pembayaran agar akses bisa diproses.</div>${waLink}`;
@@ -1156,6 +1161,7 @@ loadStoreData();
 </script>
 </body>
 </html>
+
 
 
 

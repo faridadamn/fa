@@ -882,6 +882,20 @@
     </div>
       <div class="article-sync-note" id="article-sync-note">Artikel tetap tersimpan lokal. Isi URL Apps Script untuk sinkron database.</div>
     </div>
+
+    <!-- Store admin identity -->
+    <div class="admin-card">
+      <div class="admin-card-title">Identitas Toko & Admin</div>
+      <div class="form-row">
+        <div class="form-label">Store ID</div>
+        <input class="form-input" value="farid-adam" disabled />
+      </div>
+      <div class="form-row">
+        <div class="form-label">Admin ID</div>
+        <input class="form-input" value="farid-owner" disabled />
+      </div>
+      <div class="article-sync-note">ID ini ikut dikirim ke Google Sheets agar nanti bisa dipakai untuk multi-toko dan admin berbeda.</div>
+    </div>
     <!-- Add/Edit product -->
     <div class="admin-card">
       <div class="admin-card-title">
@@ -987,7 +1001,7 @@
 
     <!-- Order list -->
     <div class="admin-card">
-      <div class="admin-card-title">Order & Konfirmasi Pembayaran</div>
+      <div class="admin-card-title">Transaksi & Konfirmasi Pembayaran</div>
       <div id="admin-order-list"></div>
     </div>
     <!-- Security -->
@@ -1058,6 +1072,8 @@
 <script>
 let products = [], profile = {}, payment = {}, articles = [];
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbya9R5Vd0W2iQKCvxVAZKWXjy92Ykk5iOfrwZwoAY0kt7gWbLVFg82JEgx1znoBdGhdAw/exec';
+const STORE_ID = 'farid-adam';
+const ADMIN_ID = 'farid-owner';
 let appScriptUrl = APPS_SCRIPT_URL;
 let orders = [];
 let activeCat = 'all';
@@ -1268,7 +1284,9 @@ function saveProfile() {
     avatar:   avatarImgData || profile.avatar || ''
   };
   localStorage.setItem('_fa_profile', JSON.stringify(profile));
-  showToast('Profil tersimpan OK');
+  syncResource('upsert', 'profile', { profile: { ...profile, storeId: STORE_ID } });
+  syncResource('upsert', 'admins', { admin: { storeId: STORE_ID, adminId: ADMIN_ID, name: profile.name, wa: profile.wa, ig: profile.ig, linkedin: profile.linkedin, role: 'owner', updatedAt: new Date().toISOString() } });
+  showToast('Profil & admin tersimpan OK');
 }
 
 function savePayment() {
@@ -1278,6 +1296,7 @@ function savePayment() {
     qris:    document.getElementById('adm-qris').value.trim()
   };
   localStorage.setItem('_fa_payment', JSON.stringify(payment));
+  syncResource('upsert', 'payment', { payment: { ...payment, storeId: STORE_ID } });
   showToast('Pembayaran tersimpan OK');
 }
 
@@ -1302,7 +1321,7 @@ async function saveProduct() {
   if (!name) { showToast('Nama produk wajib diisi'); return; }
   if (editingId) {
     const idx = products.findIndex(p => p.id === editingId);
-    if (idx !== -1) products[idx] = { ...products[idx], name,
+    if (idx !== -1) products[idx] = { ...products[idx], storeId: STORE_ID, name,
       cat:   document.getElementById('adm-pcat').value,
       desc:  document.getElementById('adm-pdesc').value.trim(),
       price: parseFloat(document.getElementById('adm-pprice').value) || 0,
@@ -1311,7 +1330,7 @@ async function saveProduct() {
     };
     showToast('Produk diperbarui OK'); cancelEdit();
   } else {
-    products.push({ id: Date.now().toString(36), name,
+    products.push({ id: Date.now().toString(36), storeId: STORE_ID, name,
       cat:   document.getElementById('adm-pcat').value,
       desc:  document.getElementById('adm-pdesc').value.trim(),
       price: parseFloat(document.getElementById('adm-pprice').value) || 0,
@@ -1321,7 +1340,9 @@ async function saveProduct() {
     showToast('Produk ditambahkan OK'); clearProductForm();
   }
   localStorage.setItem('_fa_products', JSON.stringify(products));
+  await syncResource('replace', 'products', { products: products.map(p => ({ ...p, storeId: p.storeId || STORE_ID })) });
   renderAdminProductList();
+  renderProducts();
 }
 
 function editProduct(id) {
@@ -1359,7 +1380,9 @@ async function deleteProduct(id) {
   if (!confirm('Hapus produk ini?')) return;
   products = products.filter(p => p.id !== id);
   localStorage.setItem('_fa_products', JSON.stringify(products));
-  renderAdminProductList(); showToast('Produk dihapus');
+  await syncResource('replace', 'products', { products: products.map(p => ({ ...p, storeId: p.storeId || STORE_ID })) });
+  renderAdminProductList();
+  renderProducts(); showToast('Produk dihapus');
 }
 
 function renderAdminProductList() {
@@ -1477,7 +1500,7 @@ function loadRemoteArticlesJsonp() {
 async function remoteGet(resource) {
   try {
     const sep = appScriptUrl.includes('?') ? '&' : '?';
-    const res = await fetch(`${appScriptUrl}${sep}action=list&resource=${resource}&ts=${Date.now()}`);
+    const res = await fetch(`${appScriptUrl}${sep}action=list&resource=${resource}&storeId=${STORE_ID}&ts=${Date.now()}`);
     return await res.json();
   } catch (err) {
     return await loadRemoteJsonp(resource);
@@ -1493,7 +1516,7 @@ function loadRemoteJsonp(resource) {
     const cleanup = () => { delete window[cb]; script.remove(); clearTimeout(timer); };
     window[cb] = data => { cleanup(); resolve(data); };
     script.onerror = () => { cleanup(); reject(new Error('JSONP gagal')); };
-    script.src = `${appScriptUrl}${sep}action=list&resource=${resource}&callback=${cb}&ts=${Date.now()}`;
+    script.src = `${appScriptUrl}${sep}action=list&resource=${resource}&storeId=${STORE_ID}&callback=${cb}&ts=${Date.now()}`;
     const timer = setTimeout(() => { cleanup(); reject(new Error('JSONP timeout')); }, 10000);
     document.body.appendChild(script);
   });
@@ -1513,7 +1536,7 @@ async function syncResource(action, resource, payload) {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, resource, ...payload })
+      body: JSON.stringify({ action, resource, storeId: STORE_ID, ...payload })
     });
     updateArticleSyncNote('Perubahan dikirim ke Apps Script.');
   } catch (err) {
@@ -1524,11 +1547,11 @@ async function syncResource(action, resource, payload) {
 async function loadRemoteAdminData() {
   try {
     const [productData, articleData, profileData, paymentData, orderData] = await Promise.all([
-      remoteGet('products'), remoteGet('articles'), remoteGet('profile'), remoteGet('payment'), remoteGet('orders')
+      remoteGet('products'), remoteGet('articles'), remoteGet('profile'), remoteGet('payment'), remoteGet('transactions')
     ]);
     const remoteProducts = asList(productData, 'products');
     const remoteArticles = asList(articleData, 'articles');
-    const remoteOrders = asList(orderData, 'orders');
+    const remoteOrders = asList(orderData, 'transactions');
     if (remoteProducts.length) { products = remoteProducts; localStorage.setItem('_fa_products', JSON.stringify(products)); }
     if (remoteArticles.length) { articles = remoteArticles; localStorage.setItem('_fa_articles', JSON.stringify(articles)); }
     if (remoteOrders.length) { orders = remoteOrders; localStorage.setItem('_fa_orders', JSON.stringify(orders)); }
@@ -1557,7 +1580,7 @@ async function loadRemoteArticles() {
   }
 }
 
-async function syncArticle(action, article) { await syncResource(action, 'articles', { article }); }
+async function syncArticle(action, article) { await syncResource(action, 'articles', { article: { ...article, storeId: article.storeId || STORE_ID } }); }
 
 async function saveArticle() {
   const title = document.getElementById('adm-atitle').value.trim();
@@ -1565,6 +1588,7 @@ async function saveArticle() {
   const now = new Date().toISOString();
   const payload = {
     id: editingArticleId || Date.now().toString(36),
+    storeId: STORE_ID,
     title,
     topic: document.getElementById('adm-atopic').value.trim() || 'Insight',
     excerpt: document.getElementById('adm-aexcerpt').value.trim(),
@@ -1659,7 +1683,7 @@ function renderAdminOrderList() {
   const el = document.getElementById('admin-order-list');
   if (!el) return;
   if (!orders.length) {
-    el.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px">Belum ada order</div>`;
+    el.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px">Belum ada transaksi</div>`;
     return;
   }
   el.innerHTML = orders
@@ -1693,6 +1717,8 @@ showAdmin();
 </script>
 </body>
 </html>
+
+
 
 
 
