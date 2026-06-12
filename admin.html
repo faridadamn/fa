@@ -696,6 +696,22 @@
   .fab-admin { position: fixed; right: max(18px, calc(50% - 240px)); bottom: 24px; z-index: 50; width: 54px; height: 54px; border: none; border-radius: 50%; background: linear-gradient(135deg, var(--blue-dk), var(--blue), var(--teal)); color: #fff; font-size: 21px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 16px 34px rgba(45,62,141,.28); transition: .18s ease; }
   .fab-admin:hover { transform: scale(1.06); }
 
+
+  .auth-gate { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: radial-gradient(circle at 85% 12%, rgba(0,183,179,.14), transparent 34%), var(--offwhite); }
+  .auth-card { width: 100%; max-width: 440px; overflow: hidden; border: 1px solid var(--border); border-radius: 20px; background: rgba(255,255,255,.94); box-shadow: var(--shadow-md); }
+  .auth-head { padding: 22px 20px 16px; background: linear-gradient(135deg, var(--blue-dk), var(--blue) 58%, var(--teal)); color: #fff; }
+  .auth-head .pass-logo { margin-bottom: 12px; }
+  .auth-head h1 { font-size: 22px; line-height: 1.2; margin-bottom: 6px; }
+  .auth-head p { font-size: 12.5px; opacity: .9; line-height: 1.6; }
+  .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 14px 16px 0; }
+  .auth-tab { padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: #fff; color: var(--text2); font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 800; cursor: pointer; }
+  .auth-tab.active { border-color: transparent; background: linear-gradient(135deg, var(--blue-dk), var(--blue), var(--teal)); color: #fff; }
+  .auth-form { padding: 16px; display: grid; gap: 12px; }
+  .auth-form[hidden] { display: none; }
+  .auth-error { display: none; padding: 10px 12px; border-radius: 10px; background: #fff5f5; color: #dc2626; font-size: 12px; font-weight: 700; }
+  .auth-note { color: var(--text2); font-size: 11.5px; line-height: 1.55; }
+  .admin-session { display: flex; flex-direction: column; gap: 2px; color: #fff; font-size: 11px; position: relative; z-index: 1; }
+  .admin-session strong { font-size: 13px; }
   .pass-gate { position: fixed; inset: 0; z-index: 300; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 32px; background: radial-gradient(circle at 90% 10%, rgba(0,183,179,.12), transparent 34%), var(--offwhite); }
   .pass-gate h3 { color: var(--blue-dk); font-size: 20px; font-weight: 800; }
   .pass-gate p { color: var(--text2); font-size: 13px; text-align: center; }
@@ -809,9 +825,7 @@
 <div id="view-admin" class="view">
   <div class="admin-topbar">
     <h2>Panel Admin</h2>
-    <button class="btn-back" onclick="showStore()">
-      <i class="ti ti-arrow-left"></i>Lihat Toko
-    </button>
+    <div class="admin-session"><strong id="session-store-label">-</strong><span id="session-admin-label">-</span></div><button class="btn-back" onclick="logoutAdmin()"><i class="ti ti-logout"></i>Keluar</button>
   </div>
 
   <div class="admin-body">
@@ -1004,15 +1018,16 @@
       <div class="admin-card-title">Transaksi & Konfirmasi Pembayaran</div>
       <div id="admin-order-list"></div>
     </div>
-    <!-- Security -->
-    <div class="admin-card" style="border-color:#fecaca">
-      <div class="admin-card-title" style="color:#dc2626;background:#fff5f5">Keamanan</div>
+    <!-- Session -->
+    <div class="admin-card">
+      <div class="admin-card-title">Sesi Admin</div>
       <div class="form-row">
-        <div class="form-label">Ganti Password Admin</div>
-        <div style="display:flex;gap:8px">
-          <input class="form-input" id="adm-newpass" type="password" placeholder="Password baru" style="flex:1" />
-          <button class="btn-primary" style="width:auto;padding:10px 16px;flex-shrink:0" onclick="changePassword()">Ganti</button>
-        </div>
+        <div class="form-label">Store ID Aktif</div>
+        <input class="form-input" id="adm-store-id-display" readonly />
+      </div>
+      <div class="form-row">
+        <div class="form-label">Admin Aktif</div>
+        <input class="form-input" id="adm-admin-email-display" readonly />
       </div>
     </div>
   </div>
@@ -1054,38 +1069,59 @@
     </div>
   </div>
 </div>
-<!-- Pass Gate -->
-<div class="pass-gate" id="pass-gate" style="display:none">
-  <div class="pass-logo">FA</div>
-  <h3>Admin Area</h3>
-  <p>Masukkan password untuk mengakses panel admin</p>
-  <input type="password" id="pass-input" placeholder="......"
-    onkeydown="if(event.key==='Enter') checkPass()" />
-  <p class="pass-error" id="pass-error" style="display:none">Password salah. Coba lagi.</p>
-  <button class="btn-primary" style="max-width:320px" onclick="checkPass()">Masuk</button>
-  <button class="modal-close-btn" style="max-width:320px" onclick="closePassGate()">Batal</button>
+<!-- Auth Gate -->
+<div class="auth-gate" id="auth-gate">
+  <div class="auth-card">
+    <div class="auth-head">
+      <div class="pass-logo">FA</div>
+      <h1>Admin Storefront</h1>
+      <p>Masuk atau daftarkan toko. Setiap toko punya Store ID dan admin masing-masing.</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="login-tab" onclick="setAuthMode('login')">Login</button>
+      <button class="auth-tab" id="register-tab" onclick="setAuthMode('register')">Register</button>
+    </div>
+    <div class="auth-form" id="login-form">
+      <div class="auth-error" id="login-error"></div>
+      <input class="form-input" id="login-store-id" placeholder="Store ID" value="farid-adam" />
+      <input class="form-input" id="login-email" type="email" placeholder="Email admin" />
+      <input class="form-input" id="login-password" type="password" placeholder="Password" onkeydown="if(event.key==='Enter') loginAdmin()" />
+      <button class="btn-primary" onclick="loginAdmin()"><i class="ti ti-login"></i>Masuk Admin</button>
+      <div class="auth-note">Store ID dipakai untuk memisahkan data antar toko di Google Sheet.</div>
+    </div>
+    <div class="auth-form" id="register-form" hidden>
+      <div class="auth-error" id="register-error"></div>
+      <input class="form-input" id="reg-store-id" placeholder="Store ID unik, contoh: farid-adam" value="farid-adam" />
+      <input class="form-input" id="reg-store-name" placeholder="Nama toko" value="Farid Adam" />
+      <input class="form-input" id="reg-admin-name" placeholder="Nama admin" />
+      <input class="form-input" id="reg-email" type="email" placeholder="Email admin" />
+      <input class="form-input" id="reg-wa" placeholder="WhatsApp admin" />
+      <input class="form-input" id="reg-password" type="password" placeholder="Password minimal 6 karakter" />
+      <button class="btn-primary" onclick="registerAdmin()"><i class="ti ti-user-plus"></i>Daftarkan Toko</button>
+      <div class="auth-note">Register akan membuat/menautkan data toko dan admin di sheet Admins + Profile.</div>
+    </div>
+  </div>
 </div>
-
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
 let products = [], profile = {}, payment = {}, articles = [];
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbya9R5Vd0W2iQKCvxVAZKWXjy92Ykk5iOfrwZwoAY0kt7gWbLVFg82JEgx1znoBdGhdAw/exec';
-const STORE_ID = 'farid-adam';
-const ADMIN_ID = 'farid-owner';
+let STORE_ID = 'farid-adam';
+let ADMIN_ID = '';
+let SESSION_TOKEN = '';
+let currentSession = null;
 let appScriptUrl = APPS_SCRIPT_URL;
 let orders = [];
 let activeCat = 'all';
 let editingId = null, editingArticleId = null;
 let productImgData = null, avatarImgData = null, articleImgData = null;
 
-const DEFAULT_PASS = 'admin123';
 const CAT_ICONS = { digital:'ti-file-code', jasa:'ti-brush', fisik:'ti-package', portofolio:'ti-photo' };
 const CAT_LABELS = { digital:'Digital', jasa:'Jasa', fisik:'Fisik', portofolio:'Portofolio' };
 const CAT_SECTION = { all:'Semua Produk & Layanan', digital:'Produk Digital', jasa:'Jasa & Layanan', fisik:'Produk Fisik', portofolio:'Portofolio & Karya' };
 
-function getPass() { return localStorage.getItem('_fa_pass') || DEFAULT_PASS; }
 function getData() {
   try { products = JSON.parse(localStorage.getItem('_fa_products') || '[]'); } catch { products = []; }
   try { profile  = JSON.parse(localStorage.getItem('_fa_profile')  || '{}'); } catch { profile = {}; }
@@ -1102,35 +1138,149 @@ function showStore() {
   renderHero(); renderProducts(); renderArticles();
 }
 function showAdmin() {
+  if (!currentSession || !SESSION_TOKEN) { openAdmin(); return; }
   document.getElementById('view-store').classList.remove('active');
   document.getElementById('view-admin').classList.add('active');
   document.getElementById('fab-admin').style.display = 'none';
+  document.getElementById('auth-gate').style.display = 'none';
+  const storeDisplay = document.getElementById('adm-store-id-display');
+  const adminDisplay = document.getElementById('adm-admin-email-display');
+  if (storeDisplay) storeDisplay.value = STORE_ID;
+  if (adminDisplay) adminDisplay.value = currentSession.email || currentSession.name || ADMIN_ID;
   loadAdminForm(); renderAdminProductList(); renderAdminArticleList(); renderAdminOrderList(); loadRemoteAdminData();
 }
 
-// Pass
+// Auth
 function openAdmin() {
-  document.getElementById('pass-gate').style.display = 'flex';
-  document.getElementById('pass-input').value = '';
-  document.getElementById('pass-error').style.display = 'none';
-  setTimeout(() => document.getElementById('pass-input').focus(), 100);
+  if (currentSession) { showAdmin(); return; }
+  document.getElementById('view-store').classList.remove('active');
+  document.getElementById('view-admin').classList.remove('active');
+  document.getElementById('fab-admin').style.display = 'none';
+  document.getElementById('auth-gate').style.display = 'flex';
+  setAuthMode('login');
 }
-function closePassGate() { document.getElementById('pass-gate').style.display = 'none'; }
-function checkPass() {
-  if (document.getElementById('pass-input').value === getPass()) {
-    closePassGate(); showAdmin();
-  } else {
-    document.getElementById('pass-error').style.display = 'block';
-    document.getElementById('pass-input').value = '';
-    document.getElementById('pass-input').focus();
+
+function setAuthMode(mode) {
+  const isRegister = mode === 'register';
+  document.getElementById('login-tab').classList.toggle('active', !isRegister);
+  document.getElementById('register-tab').classList.toggle('active', isRegister);
+  document.getElementById('login-form').hidden = isRegister;
+  document.getElementById('register-form').hidden = !isRegister;
+  document.getElementById('login-form').style.display = isRegister ? 'none' : 'flex';
+  document.getElementById('register-form').style.display = isRegister ? 'flex' : 'none';
+  showAuthError('login-error', '');
+  showAuthError('register-error', '');
+}
+
+function showAuthError(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg || '';
+  el.style.display = msg ? 'block' : 'none';
+}
+
+function slugifyStoreId(value) {
+  return String(value || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48);
+}
+
+async function sha256(text) {
+  const bytes = new TextEncoder().encode(text);
+  const hash = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function authRequest(action, payload) {
+  return new Promise((resolve, reject) => {
+    if (!appScriptUrl || !document.body) return reject(new Error('Endpoint belum siap'));
+    const cb = `faAuthCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const sep = appScriptUrl.includes('?') ? '&' : '?';
+    const script = document.createElement('script');
+    const params = new URLSearchParams({ action, callback: cb, ts: Date.now().toString() });
+    Object.entries(payload || {}).forEach(([key, value]) => params.set(key, value == null ? '' : String(value)));
+    const cleanup = () => { delete window[cb]; script.remove(); clearTimeout(timer); };
+    window[cb] = data => { cleanup(); resolve(data); };
+    script.onerror = () => { cleanup(); reject(new Error('Koneksi Apps Script gagal')); };
+    script.src = `${appScriptUrl}${sep}${params.toString()}`;
+    const timer = setTimeout(() => { cleanup(); reject(new Error('Login timeout')); }, 12000);
+    document.body.appendChild(script);
+  });
+}
+
+function applySession(session) {
+  currentSession = session || {};
+  STORE_ID = currentSession.storeId || STORE_ID;
+  ADMIN_ID = currentSession.adminId || '';
+  SESSION_TOKEN = currentSession.sessionToken || '';
+  localStorage.setItem('_fa_admin_session', JSON.stringify(currentSession));
+  document.getElementById('auth-gate').style.display = 'none';
+  document.getElementById('session-store-label').textContent = STORE_ID;
+  document.getElementById('session-admin-label').textContent = currentSession.email || currentSession.name || 'Admin';
+  showAdmin();
+}
+
+function restoreSession() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('_fa_admin_session') || 'null');
+    if (saved && saved.storeId && saved.adminId && saved.sessionToken) {
+      applySession(saved);
+      return true;
+    }
+  } catch {}
+  openAdmin();
+  return false;
+}
+
+function logoutAdmin() {
+  localStorage.removeItem('_fa_admin_session');
+  currentSession = null;
+  ADMIN_ID = '';
+  SESSION_TOKEN = '';
+  openAdmin();
+}
+
+async function loginAdmin() {
+  const storeId = slugifyStoreId(document.getElementById('login-store-id').value);
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
+  if (!storeId || !email || !password) { showAuthError('login-error', 'Store ID, email, dan password wajib diisi.'); return; }
+  showAuthError('login-error', '');
+  try {
+    const passwordHash = await sha256(`${storeId}:${email}:${password}`);
+    const data = await authRequest('login', { storeId, email, passwordHash });
+    if (!data || !data.ok) throw new Error((data && data.error) || 'Login gagal.');
+    applySession(data.session);
+    showToast('Login berhasil');
+  } catch (err) {
+    showAuthError('login-error', String(err.message || err));
   }
 }
-function changePassword() {
-  const v = document.getElementById('adm-newpass').value.trim();
-  if (!v || v.length < 4) { showToast('Minimal 4 karakter'); return; }
-  localStorage.setItem('_fa_pass', v);
-  document.getElementById('adm-newpass').value = '';
-  showToast('Password berhasil diganti OK');
+
+async function registerAdmin() {
+  const storeId = slugifyStoreId(document.getElementById('reg-store-id').value);
+  const storeName = document.getElementById('reg-store-name').value.trim();
+  const adminName = document.getElementById('reg-admin-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim().toLowerCase();
+  const wa = document.getElementById('reg-wa').value.trim();
+  const password = document.getElementById('reg-password').value;
+  if (!storeId || !storeName || !adminName || !email || password.length < 6) {
+    showAuthError('register-error', 'Lengkapi data toko. Password minimal 6 karakter.');
+    return;
+  }
+  showAuthError('register-error', '');
+  try {
+    const passwordHash = await sha256(`${storeId}:${email}:${password}`);
+    const data = await authRequest('register', { storeId, storeName, adminName, email, wa, passwordHash });
+    if (!data || !data.ok) throw new Error((data && data.error) || 'Register gagal.');
+    applySession(data.session);
+    showToast('Toko dan admin dibuat');
+  } catch (err) {
+    showAuthError('register-error', String(err.message || err));
+  }
 }
 
 // Hero
@@ -1285,7 +1435,7 @@ function saveProfile() {
   };
   localStorage.setItem('_fa_profile', JSON.stringify(profile));
   syncResource('upsert', 'profile', { profile: { ...profile, storeId: STORE_ID } });
-  syncResource('upsert', 'admins', { admin: { storeId: STORE_ID, adminId: ADMIN_ID, name: profile.name, wa: profile.wa, ig: profile.ig, linkedin: profile.linkedin, role: 'owner', updatedAt: new Date().toISOString() } });
+  syncResource('upsert', 'admins', { admin: { storeId: STORE_ID, adminId: ADMIN_ID, name: profile.name, email: currentSession?.email || '', wa: profile.wa, ig: profile.ig, linkedin: profile.linkedin, role: currentSession?.role || 'owner', updatedAt: new Date().toISOString() } });
   showToast('Profil & admin tersimpan OK');
 }
 
@@ -1500,7 +1650,15 @@ function loadRemoteArticlesJsonp() {
 async function remoteGet(resource) {
   try {
     const sep = appScriptUrl.includes('?') ? '&' : '?';
-    const res = await fetch(`${appScriptUrl}${sep}action=list&resource=${resource}&storeId=${STORE_ID}&ts=${Date.now()}`);
+    const params = new URLSearchParams({
+      action: 'list',
+      resource,
+      storeId: STORE_ID,
+      adminId: ADMIN_ID,
+      sessionToken: SESSION_TOKEN,
+      ts: Date.now().toString()
+    });
+    const res = await fetch(`${appScriptUrl}${sep}${params.toString()}`);
     return await res.json();
   } catch (err) {
     return await loadRemoteJsonp(resource);
@@ -1516,7 +1674,16 @@ function loadRemoteJsonp(resource) {
     const cleanup = () => { delete window[cb]; script.remove(); clearTimeout(timer); };
     window[cb] = data => { cleanup(); resolve(data); };
     script.onerror = () => { cleanup(); reject(new Error('JSONP gagal')); };
-    script.src = `${appScriptUrl}${sep}action=list&resource=${resource}&storeId=${STORE_ID}&callback=${cb}&ts=${Date.now()}`;
+    const params = new URLSearchParams({
+      action: 'list',
+      resource,
+      storeId: STORE_ID,
+      adminId: ADMIN_ID,
+      sessionToken: SESSION_TOKEN,
+      callback: cb,
+      ts: Date.now().toString()
+    });
+    script.src = `${appScriptUrl}${sep}${params.toString()}`;
     const timer = setTimeout(() => { cleanup(); reject(new Error('JSONP timeout')); }, 10000);
     document.body.appendChild(script);
   });
@@ -1536,7 +1703,7 @@ async function syncResource(action, resource, payload) {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, resource, storeId: STORE_ID, ...payload })
+      body: JSON.stringify({ action, resource, storeId: STORE_ID, adminId: ADMIN_ID, sessionToken: SESSION_TOKEN, ...payload })
     });
     updateArticleSyncNote('Perubahan dikirim ke Apps Script.');
   } catch (err) {
@@ -1711,12 +1878,13 @@ function showToast(msg) {
 
 getData();
 document.getElementById('view-store').classList.remove('active');
-document.getElementById('view-admin').classList.add('active');
+document.getElementById('view-admin').classList.remove('active');
 document.getElementById('fab-admin').style.display = 'none';
-showAdmin();
+restoreSession();
 </script>
 </body>
 </html>
+
 
 
 
