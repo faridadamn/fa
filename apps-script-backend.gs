@@ -82,12 +82,12 @@ function doPost(e) {
 }
 
 function registerAdmin_(p, storeId) {
-  const email = normalizeEmail_(p.email);
+  const email = normalizeEmail_(p.email || `${storeId}@store.local`);
   const passwordHash = String(p.passwordHash || '');
   const name = String(p.adminName || p.name || '').trim();
   const storeName = String(p.storeName || storeId).trim();
   if (!storeId || !email || !passwordHash || !name) throw new Error('Data register belum lengkap');
-  if (findAdminByEmail_(storeId, email)) throw new Error('Admin untuk toko ini sudah terdaftar');
+  if (findFirstAdmin_(storeId)) throw new Error('Store ID ini sudah terdaftar');
 
   const now = new Date().toISOString();
   const sessionToken = makeToken_();
@@ -115,8 +115,8 @@ function registerAdmin_(p, storeId) {
 function loginAdmin_(p, storeId) {
   const email = normalizeEmail_(p.email);
   const passwordHash = String(p.passwordHash || '');
-  const found = findAdminByEmail_(storeId, email);
-  if (!found || String(found.admin.passwordHash || '') !== passwordHash) throw new Error('Store ID, email, atau password salah');
+  const found = email ? findAdminByEmail_(storeId, email) : findAdminByPassword_(storeId, passwordHash);
+  if (!found || String(found.admin.passwordHash || '') !== passwordHash) throw new Error('Store ID atau password salah');
 
   const sessionToken = makeToken_();
   const sessionExpires = expiresAt_();
@@ -268,8 +268,26 @@ function findAdminByEmail_(storeId, email) {
   return findAdmin_(storeId, 'email', normalizeEmail_(email));
 }
 
+function findAdminByPassword_(storeId, passwordHash) {
+  return findAdmin_(storeId, 'passwordHash', String(passwordHash || ''));
+}
+
 function findAdminById_(storeId, adminId) {
   return findAdmin_(storeId, 'adminId', String(adminId || ''));
+}
+
+function findFirstAdmin_(storeId) {
+  const sh = sheet_('admins');
+  const values = sh.getDataRange().getValues();
+  if (values.length <= 1) return null;
+  const headers = values[0];
+  const storeIdx = headers.indexOf('storeId');
+  for (let i = 1; i < values.length; i++) {
+    if (String(values[i][storeIdx]) === String(storeId)) {
+      return { rowIndex: i + 1, admin: rowToObject_(headers, values[i]) };
+    }
+  }
+  return null;
 }
 
 function findAdmin_(storeId, field, value) {

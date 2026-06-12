@@ -1144,17 +1144,15 @@
     <div class="auth-form" id="login-form">
       <div class="auth-error" id="login-error"></div>
       <input class="form-input" id="login-store-id" placeholder="Store ID" value="farid-adam" />
-      <input class="form-input" id="login-email" type="email" placeholder="Email admin" />
       <input class="form-input" id="login-password" type="password" placeholder="Password" onkeydown="if(event.key==='Enter') loginAdmin()" />
       <button class="btn-primary" onclick="loginAdmin()"><i class="ti ti-login"></i>Masuk Admin</button>
-      <div class="auth-note">Store ID dipakai untuk memisahkan data antar toko di Google Sheet.</div>
+      <div class="auth-note">Login cukup pakai Store ID toko dan password admin.</div>
     </div>
     <div class="auth-form" id="register-form" hidden>
       <div class="auth-error" id="register-error"></div>
       <input class="form-input" id="reg-store-id" placeholder="Store ID unik, contoh: farid-adam" value="farid-adam" />
       <input class="form-input" id="reg-store-name" placeholder="Nama toko" value="Farid Adam" />
       <input class="form-input" id="reg-admin-name" placeholder="Nama admin" />
-      <input class="form-input" id="reg-email" type="email" placeholder="Email admin" />
       <input class="form-input" id="reg-wa" placeholder="WhatsApp admin" />
       <input class="form-input" id="reg-password" type="password" placeholder="Password minimal 6 karakter" />
       <button class="btn-primary" onclick="registerAdmin()"><i class="ti ti-user-plus"></i>Daftarkan Toko</button>
@@ -1246,8 +1244,8 @@ function setAuthMode(mode) {
   document.getElementById('register-tab').classList.toggle('active', isRegister);
   document.getElementById('login-form').hidden = isRegister;
   document.getElementById('register-form').hidden = !isRegister;
-  document.getElementById('login-form').style.display = isRegister ? 'none' : 'flex';
-  document.getElementById('register-form').style.display = isRegister ? 'flex' : 'none';
+  document.getElementById('login-form').style.display = isRegister ? 'none' : 'grid';
+  document.getElementById('register-form').style.display = isRegister ? 'grid' : 'none';
   showAuthError('login-error', '');
   showAuthError('register-error', '');
 }
@@ -1325,13 +1323,12 @@ function logoutAdmin() {
 
 async function loginAdmin() {
   const storeId = slugifyStoreId(document.getElementById('login-store-id').value);
-  const email = document.getElementById('login-email').value.trim().toLowerCase();
   const password = document.getElementById('login-password').value;
-  if (!storeId || !email || !password) { showAuthError('login-error', 'Store ID, email, dan password wajib diisi.'); return; }
+  if (!storeId || !password) { showAuthError('login-error', 'Store ID dan password wajib diisi.'); return; }
   showAuthError('login-error', '');
   try {
-    const passwordHash = await sha256(`${storeId}:${email}:${password}`);
-    const data = await authRequest('login', { storeId, email, passwordHash });
+    const passwordHash = await sha256(`${storeId}:${password}`);
+    const data = await authRequest('login', { storeId, passwordHash });
     if (!data || !data.ok) throw new Error((data && data.error) || 'Login gagal.');
     applySession(data.session);
     showToast('Login berhasil');
@@ -1344,17 +1341,16 @@ async function registerAdmin() {
   const storeId = slugifyStoreId(document.getElementById('reg-store-id').value);
   const storeName = document.getElementById('reg-store-name').value.trim();
   const adminName = document.getElementById('reg-admin-name').value.trim();
-  const email = document.getElementById('reg-email').value.trim().toLowerCase();
   const wa = document.getElementById('reg-wa').value.trim();
   const password = document.getElementById('reg-password').value;
-  if (!storeId || !storeName || !adminName || !email || password.length < 6) {
+  if (!storeId || !storeName || !adminName || password.length < 6) {
     showAuthError('register-error', 'Lengkapi data toko. Password minimal 6 karakter.');
     return;
   }
   showAuthError('register-error', '');
   try {
-    const passwordHash = await sha256(`${storeId}:${email}:${password}`);
-    const data = await authRequest('register', { storeId, storeName, adminName, email, wa, passwordHash });
+    const passwordHash = await sha256(`${storeId}:${password}`);
+    const data = await authRequest('register', { storeId, storeName, adminName, wa, passwordHash });
     if (!data || !data.ok) throw new Error((data && data.error) || 'Register gagal.');
     applySession(data.session);
     showToast('Toko dan admin dibuat');
