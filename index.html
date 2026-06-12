@@ -882,7 +882,7 @@ function localRead(key, fallback) {
 }
 
 function localWrite(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch (err) { console.warn('Local cache skipped:', key, err && err.message); }
 }
 
 function fetchJsonp(params) {
@@ -941,28 +941,40 @@ async function loadStoreData() {
   payment = { ...DEFAULT_PAYMENT, ...localRead('_fa_payment', {}) };
   renderHero(); renderProducts(); renderArticles();
 
-  try {
-    const [productData, articleData, profileData, paymentData] = await Promise.all([
-      remoteGet('products'),
-      remoteGet('articles'),
-      remoteGet('profile'),
-      remoteGet('payment')
-    ]);
-    const remoteProducts = normalizeList(productData, 'products');
-    const remoteArticles = normalizeList(articleData, 'articles');
-    if (remoteProducts.length) { products = remoteProducts; localWrite('_fa_products', products); }
-    if (remoteArticles.length) { articles = remoteArticles; localWrite('_fa_articles', articles); }
-    if (profileData && (profileData.profile || profileData.name)) {
-      profile = { ...DEFAULT_PROFILE, ...(profileData.profile || profileData) };
-      localWrite('_fa_profile', profile);
+  const [productRes, articleRes, profileRes, paymentRes] = await Promise.allSettled([
+    remoteGet('products'),
+    remoteGet('articles'),
+    remoteGet('profile'),
+    remoteGet('payment')
+  ]);
+
+  if (productRes.status === 'fulfilled') {
+    const remoteProducts = normalizeList(productRes.value, 'products');
+    if (remoteProducts.length) {
+      products = remoteProducts;
+      localWrite('_fa_products', products);
+      renderProducts();
     }
-    if (paymentData && (paymentData.payment || paymentData.bank || paymentData.ewallet || paymentData.qris)) {
-      payment = { ...DEFAULT_PAYMENT, ...(paymentData.payment || paymentData) };
-      localWrite('_fa_payment', payment);
+  }
+
+  if (articleRes.status === 'fulfilled') {
+    const remoteArticles = normalizeList(articleRes.value, 'articles');
+    if (remoteArticles.length) {
+      articles = remoteArticles;
+      localWrite('_fa_articles', articles);
+      renderArticles();
     }
-    renderHero(); renderProducts(); renderArticles();
-  } catch {
-    renderHero(); renderProducts(); renderArticles();
+  }
+
+  if (profileRes.status === 'fulfilled' && profileRes.value && (profileRes.value.profile || profileRes.value.name)) {
+    profile = { ...DEFAULT_PROFILE, ...(profileRes.value.profile || profileRes.value) };
+    localWrite('_fa_profile', profile);
+    renderHero();
+  }
+
+  if (paymentRes.status === 'fulfilled' && paymentRes.value && (paymentRes.value.payment || paymentRes.value.bank || paymentRes.value.ewallet || paymentRes.value.qris)) {
+    payment = { ...DEFAULT_PAYMENT, ...(paymentRes.value.payment || paymentRes.value) };
+    localWrite('_fa_payment', payment);
   }
 }
 
@@ -1144,6 +1156,7 @@ loadStoreData();
 </script>
 </body>
 </html>
+
 
 
 
